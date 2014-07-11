@@ -5,7 +5,7 @@
     [score.freq :refer :all])  
   (:require [pink.audio.engine :as eng]
             [pink.audio.envelopes :refer [env exp-env adsr xadsr xar]]
-            [pink.audio.oscillators2 :refer [sine sine2]]
+            [pink.audio.oscillators :refer [sine sine2]]
             [pink.audio.util :refer [mul sum let-s reader]]
             [pink.event :refer :all]))
 
