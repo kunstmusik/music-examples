@@ -6,12 +6,11 @@
   (:require [pink.audio.engine :as eng]
             [pink.audio.envelopes :refer [env exp-env adsr xadsr xar]]
             [pink.audio.oscillators :refer [oscili]]
-            [pink.audio.util :refer [mul sum let-s reader]]
+            [pink.audio.util :refer [mul sum let-s reader const create-buffer fill]]
             [pink.event :refer :all]))
 
 
 (defn table-synth [amp freq dur]
-  (println "Truncating...")
   (mul
      (oscili amp freq)
      (env [0.0 0.0, 0.05 1, 0.02 0.5, dur 0.5, 0.2 0])))
@@ -27,17 +26,35 @@
 
 (comment
 
+  (defn white-noise []
+    (let [out (create-buffer)] 
+      (fn []
+        (fill out  (double-array 1 0)
+              (fn [a] (- (* 2 (Math/random) 1)))) 
+      ))
+    )
+
   (defn my-score [e] 
-    (schedule
+    (schedule e
       (gen-notes
         (repeat table-synth)
         0.0 
-        0.25
-        (map #(env [0.0 (* 440.0 %) 5.0 (* 880 %)])
+        0.05
+        (map #(mul (const (* % 440.0)) 
+                   (sum 2.0 (mul (white-noise) 
+                        (env [0.0 0.5 1.0 1.0 2.0 1.0 5.0 0.0]) 
+                        )))
              (range 1 3 0.5))
         5.0
         )))
-    
+  
+  (def e (eng/engine-create))  
+  (eng/engine-start e)
+
+  (eng/engine-add-afunc e (eng-events-runner (my-score e)))
+
+  (eng/engine-stop e)
+  (eng/engine-clear e)  
 
   (let [e (eng/engine-create)
         simple-glissandi (my-score e) 
