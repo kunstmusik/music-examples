@@ -24,34 +24,39 @@
   (engine-events e 
     (score->events notes)))
 
+
+(defn white-noise []
+  (let [out (create-buffer)] 
+    (fn []
+      (fill out  (double-array 1 0)
+            (fn [a] (- (* 2 (Math/random) 1)))) 
+      ))
+  )
+
+(defn my-score [e] 
+  (schedule e
+            (gen-notes
+              (repeat table-synth)
+              0.0 
+              0.05
+              (map #(mul (const (* % 440.0)) 
+                         (sum 2.0 (mul (white-noise) 
+                                       (env [0.0 0.5 1.0 1.0 2.0 1.0 5.0 0.0]) 
+                                       )))
+                   (range 1 3 0.5))
+              5.0
+              )))
+
 (comment
 
-  (defn white-noise []
-    (let [out (create-buffer)] 
-      (fn []
-        (fill out  (double-array 1 0)
-              (fn [a] (- (* 2 (Math/random) 1)))) 
-      ))
-    )
-
-  (defn my-score [e] 
-    (schedule e
-      (gen-notes
-        (repeat table-synth)
-        0.0 
-        0.05
-        (map #(mul (const (* % 440.0)) 
-                   (sum 2.0 (mul (white-noise) 
-                        (env [0.0 0.5 1.0 1.0 2.0 1.0 5.0 0.0]) 
-                        )))
-             (range 1 3 0.5))
-        5.0
-        )))
-  
   (def e (eng/engine-create))  
   (eng/engine-start e)
 
   (eng/engine-add-afunc e (eng-events-runner (my-score e)))
+
+  (binding [eng/*ksmps* 256]
+      (eng/engine-add-afunc e (eng-events-runner (my-score e)))
+    )
 
   (eng/engine-stop e)
   (eng/engine-clear e)  
