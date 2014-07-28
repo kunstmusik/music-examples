@@ -17,9 +17,17 @@
    "-XX:+UseTLAB"                ; Uses thread-local object allocation blocks. This
    ;  improves concurrency by reducing contention on
    ;  the shared heap lock.
-   "-XX:MaxTenuringThreshold=0"] ; Makes the full NewSize available to every NewGC
+   "-XX:MaxTenuringThreshold=0" ; Makes the full NewSize available to every NewGC 
+   "-Xshare:off" 
+   ] 
 
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [kunstmusik/pink "0.1.0-SNAPSHOT"]
                  [kunstmusik/score "0.1.0-SNAPSHOT"]
-                 ])
+                 ]
+  :profiles  {
+              :dev  {
+                     :global-vars  {*warn-on-reflection* true}
+                     }}
+
+  )
