@@ -3,10 +3,11 @@
     [score.core :refer :all]
     [score.bpf :refer :all]
     [score.freq :refer :all])  
-  (:require [pink.audio.engine :as eng]
-            [pink.audio.envelopes :refer [env exp-env adsr xadsr xar]]
-            [pink.audio.oscillators :refer [oscili]]
-            [pink.audio.util :refer [mul sum let-s reader const create-buffer fill]]
+  (:require [pink.engine :as eng]
+            [pink.config :refer :all]
+            [pink.envelopes :refer [env exp-env adsr xadsr xar]]
+            [pink.oscillators :refer [oscili]]
+            [pink.util :refer [mul sum let-s reader const create-buffer fill]]
             [pink.event :refer :all]))
 
 
@@ -15,17 +16,6 @@
      (oscili amp freq)
      (env [0.0 0.0, 0.05 1, 0.02 0.5, dur 0.5, 0.2 0])))
 
-(comment
-
-  (defn print-assembly 
-    [obj]
-    (println (str "Printing assembly for class: " (.getClass obj)))
-    ()
-    )
-
-  (print-assembly (table-synth 1 0 2 ))
-
-  )
 
 (defn score->events
   [score]
@@ -52,7 +42,7 @@
         cur-val (atom 0.5)
         cur-slope (atom (/ 0.5 @num-samples))
         out ^doubles (create-buffer)
-        len eng/*ksmps*]
+        len *ksmps*]
     (fn []
       (loop [i (unchecked-int 0)
              samps @num-samples

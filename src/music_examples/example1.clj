@@ -3,10 +3,10 @@
     [score.core :refer :all]
     [score.bpf :refer :all]
     [score.freq :refer :all])  
-  (:require [pink.audio.engine :as eng]
-            [pink.audio.envelopes :refer [env exp-env adsr xadsr xar]]
-            [pink.audio.oscillators :refer [sine sine2]]
-            [pink.audio.util :refer [mul sum let-s reader]]
+  (:require [pink.engine :as eng]
+            [pink.envelopes :refer [env exp-env adsr xadsr xar]]
+            [pink.oscillators :refer [sine sine2]]
+            [pink.util :refer [mul sum let-s reader]]
             [pink.event :refer :all]))
 
 
@@ -39,8 +39,8 @@
           (apply engine-events e
             (score->events 
               (gen-notes2 0.0 5.0
-                          (const fm-bell)
-                          (const 0.5)
+                          (repeat fm-bell)
+                          (repeat 0.5)
                           (bpf [0 440 5.0 880])
                           ))
             
