@@ -3,12 +3,13 @@
     [score.core :refer :all]
     [score.bpf :refer :all]
     [score.freq :refer :all])  
-  (:require [pink.engine :as eng]
+  (:require [pink.engine :refer :all]
             [pink.config :refer :all]
             [pink.envelopes :refer [env exp-env adsr xadsr xar]]
             [pink.oscillators :refer [oscili]]
             [pink.util :refer [mul sum let-s reader const create-buffer fill]]
-            [pink.event :refer :all]))
+            [pink.event :refer :all]
+            [pink.config :refer :all]))
 
 
 (defn table-synth [amp freq dur]
@@ -36,13 +37,13 @@
   )
 
 (defn wandering []
-  (let [samp-wander 12000
+  (let [samp-wander 20000
         cur-count (atom 0)
         num-samples (atom (+ samp-wander (rand-int samp-wander)))
         cur-val (atom 0.5)
         cur-slope (atom (/ 0.5 @num-samples))
         out ^doubles (create-buffer)
-        len *ksmps*]
+        len *buffer-size*]
     (fn []
       (loop [i (unchecked-int 0)
              samps @num-samples
@@ -67,55 +68,72 @@
             (recur i new-run 0 v new-slope))
           )))))
 
-(defn my-score [e] 
+(defn my-score [e amp base-freq] 
   (schedule e
             (gen-notes
               (repeat table-synth)
               0.0 
-              0.1
-              (map #(mul (const (* % 440.0)) 
+              amp 
+              (map #(mul (* % base-freq) 
                          (sum 1.0 (wandering)))
                    (range 1 3 0.5))
               55.0)))
 
-(defn my-score2 [e] 
+(defn my-score2 [e amp base-freq] 
   (let-s [w (wandering)]
    (schedule e
             (gen-notes
               (repeat table-synth)
               0.0 
-              0.1
-              (map #(mul (const (* % 440.0)) 
+              amp 
+              (map #(mul (* % base-freq) 
                          (sum 1.0 w))
                    (range 1 3 0.5))
               55.0))))
 
+(defn my-score3 [e amp base-freq] 
+  (loop [indx 0 start 0.0 dur 30.0 score []] 
+    (let-s [w (env [0.0 1.0 dur 2.0])
+            amp-env (mul (env [0.0 0.0 dur amp]))]  
+      (if (< indx 5) 
+        (recur (unchecked-inc indx) (+ start 5.0) (- dur 5.0) 
+               (concat score (gen-notes
+                 (repeat table-synth) 
+                 start 
+                 amp-env 
+                 (map #(mul (* % base-freq indx) w) (range 1 3 0.5))
+                 dur)))
+        (schedule e score)))))
 
 (comment
 
-  (def e (eng/engine-create))  
-  (eng/engine-start e)
+  (def e (engine-create))  
+  (engine-start e)
 
-  (eng/engine-add-afunc e (eng-events-runner (my-score e)))
-  (eng/engine-add-afunc e (eng-events-runner (my-score2 e)))
+  (engine-add-events e (my-score2 e 0.1 440.0))
+  (engine-add-events e (my-score e 0.1 440.0))
 
-  (binding [eng/*ksmps* 256]
-      (eng/engine-add-afunc e (eng-events-runner (my-score e)))
-    )
+  (engine-add-events e (my-score2 e (repeatedly #(mul 0.1 (wandering))) 220.0))
+  (engine-add-events e (my-score e (repeatedly #(mul 0.1 (wandering))) 110.0))
+  
+  (engine-add-events e (my-score3 e 0.1 110.0))
+  
 
-  (eng/engine-stop e)
-  (eng/engine-clear e)  
+  (engine-stop e)
+  (engine-clear e)  
 
-  (let [e (eng/engine-create)
+  (let [e (engine-create)
         simple-glissandi (my-score e) 
         ]
     
-      (eng/engine-start e)
-      (eng/engine-add-afunc e (eng-events-runner simple-glissandi))
+      (engine-start e)
+      (engine-add-events e simple-glissandi)
 
       (Thread/sleep 6000)
-      (eng/engine-stop e)
-      (eng/engine-clear e)))
+      (engine-stop e)
+      (engine-clear e)))
+
+
 
 
 
