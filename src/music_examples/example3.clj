@@ -28,17 +28,21 @@
     (* beat-time (/ 60.0 @tempo))
     )
 
+  (defn instr-horn
+    [freq loc]
+    (pan 
+      (mul (xar 0.01 0.05) 
+           (horn 0.1 freq))
+      loc)
+    )
+
   (defn perf-func 
     "control-function that plays score blocks over time"
-    [loc [x & xs]]
+    [loc dur [x & xs]]
     (when x
-      (play (pan 
-              (mul (xar 0.01 0.05) 
-                (horn 0.20 x))
-              loc)) 
+      (play (instr-horn x loc)) 
       (when xs
-        (schedule (event perf-func (apply-tempo 0.5) loc xs)))
-      
+        (schedule (event perf-func (apply-tempo dur) loc dur xs)))
       ))
 
   (def score 
@@ -48,13 +52,18 @@
     (take 1000 (map ->freq (cycle [:c4 :d4 :e4 :f#4]))))
 
   (def score3 
-    (take 1000 (map ->freq (cycle [:c5 :d5 :e5 :f#5]))))
+    (take 1000 (map ->freq (cycle [:c5 :d5 :e5 :f#5 :g#4]))))
 
-  (schedule (event perf-func 0.0 [-1.0 score]))
-  (schedule (event perf-func 0.0 [1.0 score2]))
-  (schedule (event perf-func 0.0 [0.0 score3]))
+  (def score4 
+    (take 1000 (map ->freq (cycle [:c5 :d6 :e5 :f#6 :g#4]))))
 
-  (reset! tempo 300.0)
+  (schedule (event perf-func 0.0 [0.25 2 score]))
+  (schedule (event perf-func 0.0 [0.5 0.5 score2]))
+  (schedule (event perf-func 0.0 [0.25 0.5 score3]))
+  (schedule (event perf-func 0.0 [1 0.25 score4]))
+  (schedule (event perf-func 0.05 [-1 0.25 score4]))
+
+  (reset! tempo 40.0)
 
   (engine-stop e)
   (engine-clear e)  
