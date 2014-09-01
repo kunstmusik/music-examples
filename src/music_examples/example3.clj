@@ -33,8 +33,7 @@
     (pan 
       (mul (xar 0.01 0.05) 
            (horn 0.1 freq))
-      loc)
-    )
+      loc))
 
   (defn perf-func 
     "control-function that plays score blocks over time"
@@ -58,12 +57,29 @@
     (take 1000 (map ->freq (cycle [:c5 :d6 :e5 :f#6 :g#4]))))
 
   (schedule (event perf-func 0.0 [0.25 2 score]))
-  (schedule (event perf-func 0.0 [0.5 0.5 score2]))
+  (schedule (event perf-func 0.0 [0.5 0.25 score2]))
   (schedule (event perf-func 0.0 [0.25 0.5 score3]))
   (schedule (event perf-func 0.0 [1 0.25 score4]))
-  (schedule (event perf-func 0.05 [-1 0.25 score4]))
+  (schedule (event perf-func 0.05 [-1 0.2 score4]))
 
-  (reset! tempo 40.0)
+  (reset! tempo 80.0)
+
+  (defn tempo-change 
+    [tatom seconds end-tempo]
+    (let [cur-buf (atom 0) 
+          end (/ (* seconds *sr*) *buffer-size*) 
+          incr (/ (- end-tempo @tatom) end)]
+      (fn []
+        (when (< @cur-buf end)
+          (swap! cur-buf inc)
+          (swap! tatom + incr)
+          true))))
+
+  (engine-add-post-cfunc e (tempo-change tempo 10 300.0))
+  (engine-add-post-cfunc e (tempo-change tempo 4 200.0))
+  (engine-add-post-cfunc e (tempo-change tempo 1 100.0))
+  (engine-add-post-cfunc e (tempo-change tempo 4 40.0))
+  (engine-add-post-cfunc e (tempo-change tempo 10 800.0))
 
   (engine-stop e)
   (engine-clear e)  
