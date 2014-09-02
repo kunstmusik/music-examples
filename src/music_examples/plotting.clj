@@ -1,6 +1,6 @@
 (ns music-examples.plotting
   (:require [pink.util :refer [shared arg mul]]
-            [pink.config :refer  [*ksmps* *current-buffer-num* *sr*]]
+            [pink.config :refer  [*buffer-size* *current-buffer-num* *sr*]]
             [pink.envelopes :refer :all]
             [pink.gen :refer  [gen9 gen17 rescale]]
             [pink.oscillators :refer :all]
@@ -34,7 +34,7 @@
         (recur (unchecked-inc-int i) 
                (doall (map #(into %1 %2) ys bufs )))
         (do
-          (map #(vector (range (* i *ksmps*)) %) ys))))))
+          (map #(vector (range (* i *buffer-size*)) %) ys))))))
 
 (defn visualize
   [& afns]
