@@ -12,8 +12,8 @@
             [pink.event :refer :all]))
 
 (defn apply-tempo 
-  [beat-time]
-  (* beat-time (/ 60.0 @tempo)))
+  [tempo beat-time]
+  (* beat-time (/ 60.0 tempo)))
 
 (defn instr-horn
   [freq loc]
@@ -24,11 +24,11 @@
 
 (defn perf-func 
   "control-function that plays score blocks over time"
-  [loc dur [x & xs]]
+  [loc dur [x & xs] tempo]
   (when x
     (play (instr-horn x loc)) 
     (when xs
-      (schedule (event perf-func (apply-tempo dur) loc dur xs)))
+      (schedule (event perf-func (apply-tempo @tempo dur) loc dur xs tempo)))
     ))
 
 (def score 
@@ -65,13 +65,14 @@
   (def ->freq (comp midi->freq keyword->notenum))
 
   (def tempo (atom 60.0))
+  (def tempo2 (atom 60.0))
 
 
-  (schedule (event perf-func 0.0 [0.25 0.5 score]))
-  (schedule (event perf-func 0.0 [0.0 0.25 score2]))
-  (schedule (event perf-func 0.0 [-0.25 0.5 score3]))
-  (schedule (event perf-func 0.0 [1 0.25 score4]))
-  (schedule (event perf-func 0.05 [-1 0.2 score4]))
+  (schedule (event perf-func 0.0 [0.25 0.5 score tempo]))
+  (schedule (event perf-func 0.0 [0.0 0.25 score2 tempo]))
+  (schedule (event perf-func 0.0 [-0.25 0.5 score3 tempo]))
+  (schedule (event perf-func 0.0 [1 0.25 score4 tempo2]))
+  (schedule (event perf-func 0.05 [-1 0.2 score4 tempo2]))
 
   (reset! tempo 80.0)
 
@@ -80,6 +81,12 @@
   (engine-add-post-cfunc e (tempo-change tempo 4 200.0))
   (engine-add-post-cfunc e (tempo-change tempo 1 100.0))
   (engine-add-post-cfunc e (tempo-change tempo 4 40.0))
+
+
+  (engine-add-post-cfunc e (tempo-change tempo2 10 300.0))
+  (engine-add-post-cfunc e (tempo-change tempo2 4 200.0))
+  (engine-add-post-cfunc e (tempo-change tempo2 1 100.0))
+  (engine-add-post-cfunc e (tempo-change tempo2 4 40.0))
 
   (engine-stop e)
   (engine-kill-all)  

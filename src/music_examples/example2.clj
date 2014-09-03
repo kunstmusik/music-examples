@@ -24,17 +24,15 @@
 
 (defn schedule 
   [e notes]
-  (engine-events e 
-    (score->events notes)))
-
+  (->> (score->events notes)
+       (engine-events e)
+       (engine-add-events e)))
 
 (defn white-noise []
   (let [out (create-buffer)] 
     (fn []
       (fill out  (double-array 1 0)
-            (fn [a] (- (* 2 (Math/random) 1)))) 
-      ))
-  )
+            (fn [a] (- (* 2 (Math/random) 1)))))))
 
 (defn wandering []
   (let [samp-wander 40000
@@ -65,36 +63,33 @@
           (let [new-run (+ samp-wander (rand-int samp-wander))
                 new-target (rand)
                 new-slope (/ (- new-target v) new-run)] 
-            (recur i new-run 0 v new-slope))
-          )))))
+            (recur i new-run 0 v new-slope)))))))
 
 (defn my-score [e amp base-freq] 
-  (schedule e
-            (gen-notes
-              (repeat table-synth)
-              0.0 
-              amp 
-              (map #(mul (* % base-freq) 
-                         (sum 1.0 (wandering)))
-                   (range 1 3 0.5))
-              55.0)))
+  (gen-notes
+    (repeat table-synth)
+    0.0 
+    amp 
+    (map #(mul (* % base-freq) 
+               (sum 1.0 (wandering)))
+         (range 1 3 0.5))
+    20.0))
 
 (defn my-score2 [e amp base-freq] 
   (let-s [w (wandering)]
-   (schedule e
-            (gen-notes
-              (repeat table-synth)
-              0.0 
-              amp 
-              (map #(mul (* % base-freq) 
-                         (sum 1.0 w))
-                   (range 1 3 0.5))
-              55.0))))
+    (gen-notes
+      (repeat table-synth)
+      0.0 
+      amp 
+      (map #(mul (* % base-freq) 
+                 (sum 1.0 w))
+           (range 1 3 0.5))
+      20.0)))
 
 (defn my-score3 [e amp base-freq] 
-  (loop [indx 0 start 0.0 dur 60.0 score []] 
-    (let-s [w (env [0.0 1.0 (/ dur 2) 2.0 (+ 1.0 (/ dur 8)) 2.0])
-            amp-env (env [0.0 0.0 (/ dur 2) amp (/ dur 8) amp 1.0 0.0])]  
+  (loop [indx 0 start 0.0 dur 40.0 score []] 
+    (let-s [w (env [0.0 1.0 (- dur 6) 2.0 6 2.0])
+            amp-env (env [0.0 0.0 (- dur 6) amp 5 amp 1.0 0.0])]  
       (if (< indx 5) 
         (recur (unchecked-inc indx) (+ start 5.0) (- dur 5.0) 
                (concat score (gen-notes
@@ -103,7 +98,7 @@
                  (repeat amp-env) 
                  (map #(mul (* % base-freq (inc indx)) w) (range 1 3 0.5))
                  dur)))
-        (schedule e score)))))
+        score))))
 
 (comment
 
@@ -111,39 +106,29 @@
   (engine-start e)
 
   ;; Simple Notes
-  (engine-add-events e (schedule e (gen-notes (repeat table-synth)
-                                  (range 0 6 0.5)
-                                  0.2 
-                                  (range 440 1760 110) 
-                                  0.5
-                                  )))
+  (schedule e (gen-notes (repeat table-synth)
+                         (range 0 7 0.5)
+                         0.2 
+                         (range 440 1760 110) 
+                         0.5
+                         )) 
 
   ;; Time Vary Frequencies 
-  (engine-add-events e (my-score2 e 0.1 440.0))
-  (engine-add-events e (my-score e 0.1 440.0))
+  (schedule e (my-score2 e 0.1 440.0))
+  (schedule e (my-score e 0.1 440.0))
 
-  (engine-add-events e (my-score2 e (repeatedly #(mul 0.1 (wandering))) 220.0))
-  (engine-add-events e (my-score e (repeatedly #(mul 0.1 (wandering))) 110.0))
+  (schedule e (my-score2 e (repeatedly #(mul 0.1 (wandering))) 220.0))
+  (schedule e (my-score e (repeatedly #(mul 0.1 (wandering))) 110.0))
   
   (engine-clear e)  
 
   ;; Group Glissandi
-  (engine-add-events e (my-score3 e 0.1 110.0))
+  (schedule e (my-score3 e 0.1 110.0))
   
-
   (engine-stop e)
-  (engine-clear e)  
   (engine-kill-all)
 
-  (let [e (engine-create)
-        simple-glissandi (my-score e)]
-    
-      (engine-start e)
-      (engine-add-events e simple-glissandi)
-
-      (Thread/sleep 6000)
-      (engine-stop e)
-      (engine-clear e)))
+  )
 
 
 
