@@ -19,41 +19,8 @@
   [freq loc]
   (pan 
     (mul (xar 0.01 0.04) 
-         (horn 0.2 freq))
+         (horn 0.1 freq))
     loc))
-
-(defn perf-func 
-  "control-function that plays score blocks over time"
-  [loc dur [x & xs] tempo]
-  (when x
-    (play (instr-horn x loc)) 
-    (when xs
-      (schedule (event perf-func (apply-tempo @tempo dur) loc dur xs tempo)))
-    ))
-
-(def score 
-  (take 1000 (map ->freq (cycle [:c4 :d4]))))
-
-(def score2 
-  (take 1000 (map ->freq (cycle [:c4 :d4 :e4 :f#4]))))
-
-(def score3 
-  (take 1000 (map ->freq (cycle [:c5 :d5 :e5 :f#5 :g#4]))))
-
-(def score4 
-  (take 1000 (map ->freq (cycle [:c5 :d6 :e5 :f#6 :g#4]))))
-
-
-(defn tempo-change 
-  [tatom seconds end-tempo]
-  (let [cur-buf (atom 0) 
-        end (/ (* seconds *sr*) *buffer-size*) 
-        incr (/ (- end-tempo @tatom) end)]
-    (fn []
-      (when (< @cur-buf end)
-        (swap! cur-buf inc)
-        (swap! tatom + incr)
-        true))))
 
 (comment
 
@@ -63,6 +30,40 @@
   (def play (partial engine-add-afunc e))
   (def schedule (partial engine-add-events e))
   (def ->freq (comp midi->freq keyword->notenum))
+
+  (def score 
+    (take 1000 (map ->freq (cycle [:c4 :d4]))))
+
+  (def score2 
+    (take 1000 (map ->freq (cycle [:c4 :d4 :e4 :f#4]))))
+
+  (def score3 
+    (take 1000 (map ->freq (cycle [:c5 :d5 :e5 :f#5 :g#4]))))
+
+  (def score4 
+    (take 1000 (map ->freq (cycle [:c5 :d6 :e5 :f#6 :g#4]))))
+
+
+  (defn tempo-change 
+    [tatom seconds end-tempo]
+    (let [cur-buf (atom 0) 
+          end (/ (* seconds *sr*) *buffer-size*) 
+          incr (/ (- end-tempo @tatom) end)]
+      (fn []
+        (when (< @cur-buf end)
+          (swap! cur-buf inc)
+          (swap! tatom + incr)
+          true))))
+
+  (defn perf-func 
+    "control-function that plays score blocks over time"
+    [loc dur [x & xs] tempo]
+    (when x
+      (play (instr-horn x loc)) 
+      (when xs
+        (schedule (event perf-func (apply-tempo @tempo dur) loc dur xs tempo)))
+      ))
+
 
   (def tempo (atom 60.0))
   (def tempo2 (atom 60.0))
