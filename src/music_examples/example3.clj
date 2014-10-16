@@ -2,11 +2,10 @@
   (:require [score.core :refer :all]
             [score.bpf :refer :all]
             [score.freq :refer :all])  
-  (:require [pink.engine :refer :all]
+  (:require [pink.simple :refer :all]
             [pink.config :refer :all]
-            [pink.envelopes :refer [env exp-env adsr xadsr xar]]
-            [pink.oscillators :refer [oscili]]
-            [pink.util :refer [mul sum let-s reader const create-buffer fill]]
+            [pink.envelopes :refer [xar]]
+            [pink.util :refer [mul]]
             [pink.instruments.horn :refer :all]
             [pink.space :refer :all]
             [pink.event :refer :all]))
@@ -24,11 +23,8 @@
 
 (comment
 
-  (def e (engine-create :nchnls 2))  
-  (engine-start e)
+  (start-engine)
 
-  (def play (partial engine-add-afunc e))
-  (def schedule (partial engine-add-events e))
   (def ->freq (comp midi->freq keyword->notenum))
 
   (def score 
@@ -59,9 +55,9 @@
     "control-function that plays score blocks over time"
     [loc dur [x & xs] tempo]
     (when x
-      (play (instr-horn x loc)) 
+      (add-afunc (instr-horn x loc)) 
       (when xs
-        (schedule (event perf-func (apply-tempo @tempo dur) loc dur xs tempo)))
+        (add-events [(event perf-func (apply-tempo @tempo dur) loc dur xs tempo)]))
       ))
 
 
@@ -69,27 +65,26 @@
   (def tempo2 (atom 60.0))
 
 
-  (schedule (event perf-func 0.0 [0.25 0.5 score tempo]))
-  (schedule (event perf-func 0.0 [0.0 0.25 score2 tempo]))
-  (schedule (event perf-func 0.0 [-0.25 0.5 score3 tempo]))
-  (schedule (event perf-func 0.0 [1 0.25 score4 tempo2]))
-  (schedule (event perf-func 0.05 [-1 0.2 score4 tempo2]))
+  (add-events (event perf-func 0.0 [0.25 0.5 score tempo]))
+  (add-events (event perf-func 0.0 [0.0 0.25 score2 tempo]))
+  (add-events (event perf-func 0.0 [-0.25 0.5 score3 tempo]))
+  (add-events (event perf-func 0.0 [1 0.25 score4 tempo2]))
+  (add-events (event perf-func 0.05 [-1 0.2 score4 tempo2]))
 
   (reset! tempo 80.0)
 
 
-  (engine-add-post-cfunc e (tempo-change tempo 10 300.0))
-  (engine-add-post-cfunc e (tempo-change tempo 4 200.0))
-  (engine-add-post-cfunc e (tempo-change tempo 1 100.0))
-  (engine-add-post-cfunc e (tempo-change tempo 4 40.0))
+  (add-post-cfunc (tempo-change tempo 10 300.0))
+  (add-post-cfunc (tempo-change tempo 4 200.0))
+  (add-post-cfunc (tempo-change tempo 1 100.0))
+  (add-post-cfunc (tempo-change tempo 4 30.0))
 
 
-  (engine-add-post-cfunc e (tempo-change tempo2 10 300.0))
-  (engine-add-post-cfunc e (tempo-change tempo2 4 200.0))
-  (engine-add-post-cfunc e (tempo-change tempo2 1 100.0))
-  (engine-add-post-cfunc e (tempo-change tempo2 4 40.0))
+  (add-post-cfunc (tempo-change tempo2 10 300.0))
+  (add-post-cfunc (tempo-change tempo2 4 200.0))
+  (add-post-cfunc (tempo-change tempo2 1 100.0))
+  (add-post-cfunc (tempo-change tempo2 4 30.0))
 
-  (engine-stop e)
-  (engine-kill-all)  
+  (stop-engine)
 
   )

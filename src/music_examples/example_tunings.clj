@@ -4,7 +4,8 @@
             [score.bpf :refer :all]
             [score.freq :refer :all]
             [score.tuning :refer :all])  
-  (:require [pink.engine :refer :all]
+  (:require [pink.simple :refer :all]
+            [pink.engine :refer [engine-events]]
             [pink.config :refer :all]
             [pink.envelopes :refer [env exp-env adsr xadsr xar]]
             [pink.oscillators :refer [oscili]]
@@ -20,15 +21,12 @@
     (horn amp freq) loc))
 
 (defn schedule 
-  [e notes]
-  (->> (map #(apply event %) notes)
-       (engine-events e)
-       (engine-add-events e)))
+  [notes]
+  (add-events (map #(apply event %) notes)))
 
 (comment
 
-  (def e (engine-create :nchnls 2))  
-  (engine-start e)
+  (start-engine)
 
   (def score-12TET
     (gen-notes 
@@ -80,12 +78,10 @@
                 (repeat 8 chord1))
         )))
 
-  (schedule e score-12TET)
-  (schedule e score-gamma)
-  (schedule e (score-gamma-chord))
+  (schedule score-12TET)
+  (schedule score-gamma)
+  (schedule (score-gamma-chord))
 
-  (engine-stop e)
-  (engine-clear e)
-  (engine-kill-all)  
+  (stop-engine)
 
   )

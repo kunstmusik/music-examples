@@ -3,7 +3,7 @@
     [score.core :refer :all]
     [score.bpf :refer :all]
     [score.freq :refer :all])  
-  (:require [pink.engine :refer :all]
+  (:require [pink.simple :refer :all]
             [pink.config :refer :all]
             [pink.envelopes :refer [env exp-env adsr xadsr xar]]
             [pink.oscillators :refer [oscili]]
@@ -17,22 +17,14 @@
      (oscili amp freq)
      (env [0.0 0.0, 0.05 1, 0.02 0.5, dur 0.5, 0.2 0])))
 
-
 (defn score->events
   [score]
   (map #(apply event %) score))
 
 (defn schedule 
-  [e notes]
+  [notes]
   (->> (score->events notes)
-       (engine-events e)
-       (engine-add-events e)))
-
-(defn white-noise []
-  (let [out (create-buffer)] 
-    (fn []
-      (fill out  (double-array 1 0)
-            (fn [a] (- (* 2 (Math/random) 1)))))))
+       (add-events)))
 
 (defn wandering []
   (let [samp-wander 40000
@@ -65,7 +57,7 @@
                 new-slope (/ (- new-target v) new-run)] 
             (recur i new-run 0 v new-slope)))))))
 
-(defn my-score [e amp base-freq] 
+(defn my-score [amp base-freq] 
   (gen-notes
     (repeat table-synth)
     0.0 
@@ -75,7 +67,7 @@
          (range 1 3 0.5))
     20.0))
 
-(defn my-score2 [e amp base-freq] 
+(defn my-score2 [amp base-freq] 
   (let-s [w (wandering)]
     (gen-notes
       (repeat table-synth)
@@ -86,7 +78,7 @@
            (range 1 3 0.5))
       20.0)))
 
-(defn my-score3 [e amp base-freq] 
+(defn my-score3 [amp base-freq] 
   (loop [indx 0 start 0.0 dur 40.0 score []] 
     (let-s [w (env [0.0 1.0 (- dur 6) 2.0 6 2.0])
             amp-env (env [0.0 0.0 (- dur 6) amp 5 amp 1.0 0.0])]  
@@ -102,11 +94,10 @@
 
 (comment
 
-  (def e (engine-create))  
-  (engine-start e)
+  (start-engine)
 
   ;; Simple Notes
-  (schedule e (gen-notes (repeat table-synth)
+  (schedule (gen-notes (repeat table-synth)
                          (range 0 7 0.5)
                          0.2 
                          (range 440 1760 110) 
@@ -114,21 +105,19 @@
                          )) 
 
   ;; Time Vary Frequencies 
-  (schedule e (my-score2 e 0.1 440.0))
-  (schedule e (my-score e 0.1 440.0))
+  (schedule (my-score2 0.1 440.0))
+  (schedule (my-score 0.1 440.0))
 
-  (schedule e (my-score2 e (repeatedly #(mul 0.1 (wandering))) 220.0))
-  (schedule e (my-score e (repeatedly #(mul 0.1 (wandering))) 110.0))
+  (schedule (my-score2 (repeatedly #(mul 0.1 (wandering))) 220.0))
+  (schedule (my-score (repeatedly #(mul 0.1 (wandering))) 110.0))
   
-  (engine-clear e)  
+  (clear-engine)  
 
   ;; Group Glissandi
-  (schedule e (my-score3 e 0.1 110.0))
+  (schedule (my-score3 0.1 110.0))
   
   (engine-stop e)
-  (engine-kill-all)
-
-  )
+  (engine-kill-all))
 
 
 
