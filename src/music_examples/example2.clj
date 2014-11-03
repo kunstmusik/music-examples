@@ -5,17 +5,20 @@
     [score.freq :refer :all])  
   (:require [pink.simple :refer :all]
             [pink.config :refer :all]
-            [pink.envelopes :refer [env exp-env adsr xadsr xar]]
+            [pink.envelopes :refer :all]
             [pink.oscillators :refer [oscili]]
-            [pink.util :refer [mul sum let-s reader const create-buffer fill]]
+            [pink.util :refer :all]
             [pink.event :refer :all]
+            [pink.space :refer :all]
             [pink.config :refer :all]))
 
 
 (defn table-synth [amp freq dur]
-  (mul
+  (pan 
+    (mul
      (oscili amp freq)
-     (env [0.0 0.0, 0.05 1, 0.02 0.5, dur 0.5, 0.2 0])))
+     (env [0.0 0.0, 0.05 1, 0.02 0.5, dur 0.5, 0.2 0]))
+    0.0))
 
 (defn score->events
   [score]
@@ -24,7 +27,7 @@
 (defn schedule 
   [notes]
   (->> (score->events notes)
-       (add-events)))
+       (add-audio-events)))
 
 (defn wandering []
   (let [samp-wander 40000
@@ -116,8 +119,8 @@
   ;; Group Glissandi
   (schedule (my-score3 0.1 110.0))
   
-  (engine-stop e)
-  (engine-kill-all))
+  (stop-engine)
+  )
 
 
 

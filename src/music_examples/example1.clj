@@ -4,10 +4,33 @@
     [score.bpf :refer :all]
     [score.freq :refer :all])  
   (:require [pink.simple :refer :all]
-            [pink.envelopes :refer [env exp-env adsr xadsr xar]]
-            [pink.oscillators :refer [sine sine2]]
-            [pink.util :refer [mul sum let-s reader]]
+            [pink.envelopes :refer :all]
+            [pink.oscillators :refer :all]
+            [pink.space :refer :all]
+            [pink.util :refer :all]
             [pink.event :refer :all]))
+
+;; Example 1 - Basic Engine Use - Add/Remove Audio Functions
+
+(comment
+
+  ; Start Default Pink Audio Engine
+  (start-engine)  
+
+  ; Create Sine Audio Function
+  (def s (pan (sine 440.0)
+              0.0))
+
+  ; Add Sine s to Default Audio Engine
+  (add-afunc s)
+
+  ; Remove Sine s from Default Audio Engine
+  (remove-afunc s)
+
+  ; Stop Default Pink Audio Engine
+  (stop-engine)
+  
+  )
 
 (defn fm-bell 
   "Simple frequency-modulation bell"
@@ -32,10 +55,12 @@
                       (bpf [0 440 5.0 880])))]
     
       (start-engine)
-      (add-events events)
-
-      (Thread/sleep 6000)
-      (stop-engine)
-      (clear-engine))
+      (add-audio-events events)
+      (add-events (event stop-engine 6.0))
+      ;(Thread/sleep 6000)
+      ;(stop-engine)
+      ;(clear-engine)
+      
+      )
 
   )
