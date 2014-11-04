@@ -26,6 +26,7 @@
                  [kunstmusik/pink "0.1.0-SNAPSHOT"]
                  [kunstmusik/score "0.2.0-SNAPSHOT"]
                  [incanter "1.5.4"]
+                 [prismatic/hiphip "0.2.0"]
                  ]
   :profiles  {
               :dev  {
