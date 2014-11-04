@@ -51,7 +51,7 @@
      (add-afunc
       (pan 
         (mul (env [0 0 0.001 0.5 (- dur 0.002) 0.5 0.001 0])
-             (oscil3 1.0 (/ 1.0 dur) 
+             (oscili 1.0 (/ 1.0 dur) 
                      (aget ^"[[D" (:data sample) 0)))
         0.0
         )))))
