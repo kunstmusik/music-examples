@@ -1,5 +1,5 @@
 (ns music-examples.plotting
-  (:require [pink.util :refer [shared arg mul]]
+  (:require [pink.util :refer [shared arg mul with-duration]]
             [pink.config :refer  [*buffer-size* *current-buffer-num* *sr*]]
             [pink.envelopes :refer :all]
             [pink.gen :refer  [gen9 gen17 rescale]]
@@ -54,6 +54,9 @@
                                 :x-label "Samples"
                                 :y-label "Signal"))))    
         (view plt)))))
+
+
+(visualize (with-duration 2.0 (adsr 0.02 0.05 0.9 0.5)))
 
 (let [amp 0.5
       freq 220
