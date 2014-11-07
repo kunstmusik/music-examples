@@ -56,24 +56,26 @@
         (view plt)))))
 
 
-(visualize (with-duration 2.0 (adsr 0.02 0.05 0.9 0.5)))
+;(visualize (with-duration 2.0 (adsr 0.02 0.05 0.9 0.5)))
 
-(let [amp 0.5
-      freq 220
-      env0  (shared 
-              (if  (number? amp)
-                (env  [0 0 0.02 amp 0.03  (* 0.9 amp) 0.5  (* 0.9 amp) 0.2 0.0] )
-                (arg amp)))
-      env1  (shared  (mul env0 env0))
-      env2  (shared  (mul env1 env0))
-      env3  (shared  (mul env2 env0))
-      envs  [env0 env1 env2 env3]
-      freqf  (shared  (arg freq))
-      phase 0.5
-      [adjust & tbls]  (horn-lookup freq horn-stopped-wave-tables) 
-      tbl-fns  (map oscil3 envs  (repeat freqf) tbls  (repeat phase))
-      ]
-  (visualize env0 env1) 
-  )
+(visualize (with-duration 0.03 (adsr 0.02 0.05 0.9 0.5)))
 
-(visualize (horn-stopped 0.5 220))
+;(let [amp 0.5
+;      freq 220
+;      env0  (shared 
+;              (if  (number? amp)
+;                (env  [0 0 0.02 amp 0.03  (* 0.9 amp) 0.5  (* 0.9 amp) 0.2 0.0] )
+;                (arg amp)))
+;      env1  (shared  (mul env0 env0))
+;      env2  (shared  (mul env1 env0))
+;      env3  (shared  (mul env2 env0))
+;      envs  [env0 env1 env2 env3]
+;      freqf  (shared  (arg freq))
+;      phase 0.5
+;      [adjust & tbls]  (horn-lookup freq horn-stopped-wave-tables) 
+;      tbl-fns  (map oscil3 envs  (repeat freqf) tbls  (repeat phase))
+;      ]
+;  (visualize env0 env1) 
+;  )
+
+;(visualize (horn-stopped 0.5 220))
