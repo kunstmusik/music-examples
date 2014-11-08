@@ -44,14 +44,13 @@
 
 (defn saw
   [freq amp]
-  (let [ampfn (adsr 0.25 0.5 amp 0.3)] 
+  (let [ampfn (mul amp (adsr 0.05 0.3 0.9 8.0))] 
     (let-s [f (sum freq (mul freq 0.0025 (sine 4)))] 
       (pan (mul ampfn 
                 (moogladder 
                   (sum (blit-saw (mul f 1.5)) 
-                       (blit-saw f)
-                       (blit-saw (mul f 0.9995))
-                       (sine2 (mul f 0.5)))
+                       (blit-square f)
+                       (blit-square (mul f 0.9995)))
                   (sum freq (mul cdepth-fn freq ampfn))    
                   resonance-fn     
                   )) 

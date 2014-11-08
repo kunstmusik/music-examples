@@ -58,7 +58,11 @@
 
 ;(visualize (with-duration 2.0 (adsr 0.02 0.05 0.9 0.5)))
 
-(visualize (with-duration 0.03 (adsr 0.02 0.05 0.9 0.5)))
+(visualize (with-duration 2.0 (adsr 0.5 0.5 0.8 0.5)))
+
+;(let [amp 0.5
+;      freq 220
+;      env0  (shared 
 
 ;(let [amp 0.5
 ;      freq 220

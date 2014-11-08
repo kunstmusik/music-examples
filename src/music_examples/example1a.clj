@@ -1,4 +1,4 @@
-(ns pink.demo.midi-keys
+(ns music-examples.example1a
   (:require [pink.simple :refer :all] 
             [pink.io.midi :refer :all]
             [pink.config :refer :all]
