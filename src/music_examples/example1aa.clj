@@ -42,9 +42,11 @@
 (def cdepth-fn (shared (port (midi-atom-reader cutoff-depth 0.0 16.0) 0.05)) )
 (def resonance-fn (shared (port (midi-atom-reader resonance 0.0 1.0) 0.05)))
 
+
+;; Synthesizer Note Instance Function
 (defn saw
   [freq amp]
-  (let [ampfn (mul amp (adsr 0.05 0.3 0.9 8.0))] 
+  (let [ampfn (mul amp (adsr 0.05 0.3 0.9 4.0))] 
     (let-s [f (sum freq (mul freq 0.0025 (sine 4)))] 
       (pan (mul ampfn 
                 (moogladder 
@@ -63,7 +65,6 @@
     keyboard 0
     (let [active ^"[[Z" (make-array Boolean/TYPE 128 1)] 
       (fn [cmd note-num velocity]
-        (println ">> " cmd " " note-num " " velocity)
         (condp = cmd
           ShortMessage/NOTE_ON
           (let [done (boolean-array 1 false)
@@ -78,32 +79,6 @@
             (aset active note-num nil)))
         )))
 
-(comment
-  ;(bind-device midim "nanoKEY KEYBOARD" "keyboard 1")
-  (bind-device midim "MPKmini2" "keyboard 1")
-
-  (bind-key-func
-    keyboard 0
-    (let [active (make-array 128)] 
-      (fn [cmd note-num velocity]
-        (println ">> " cmd " " note-num " " velocity)
-        (condp = cmd
-          ShortMessage/NOTE_ON
-          (let [done (boolean-array 1 false)
-                afn (binding [*done* done] 
-                      (saw (midi->freq note-num) (/ velocity 127)))]
-            (aset active note-num done)
-            (add-afunc afn))                        ;; <= add-afunc
-
-          ShortMessage/NOTE_OFF
-          (when-let [^booleans done (aget active note-num)]
-            (aset done 0 false)
-            (aset active note-num nil)))
-        )))
-
-
-
-  (start-engine)                                    ;; start-engine
-  
-  )
+;; Start engine for performance
+(start-engine)
 
