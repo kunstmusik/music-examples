@@ -31,6 +31,15 @@
   :profiles  {
               :dev  {
                      :global-vars  {*warn-on-reflection* true}
-                     }}
+                     }
+
+              :profiling  {
+                           :plugins  [[lein-nodisassemble "0.1.3"]] 
+                           :dependencies  [[org.clojure/clojure "1.7.0-alpha3"]] 
+                           :global-vars  {*warn-on-reflection* true
+                                          *unchecked-math* :warn-on-boxed
+                                          }      
+
+                           }}
 
   )
