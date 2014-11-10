@@ -22,13 +22,13 @@
 
 (defn midi-atom-reader
   [source-atom ^double target-mn ^double target-mx]
-  (let  [out ^doubles  (create-buffer)
-         cur-val  (atom @source-atom)
-         target-range  (- target-mx target-mn)]
-    (fn  []
-      (let  [v @source-atom] 
-        (when  (not  (= @cur-val v))
-          (let  [new-v  (+ target-mn  (* target-range  (/  (double v) 127.0)))]
+  (let [out ^doubles  (create-buffer)
+        cur-val  (atom @source-atom)
+        target-range  (- target-mx target-mn)]
+    (fn []
+      (let [v @source-atom] 
+        (when (not  (= @cur-val v))
+          (let [new-v (+ target-mn (* target-range (/  (double v) 127.0)))]
             (reset! cur-val v) 
             (Arrays/fill out new-v))))
       out)))
@@ -69,7 +69,7 @@
           ShortMessage/NOTE_ON
           (let [done (boolean-array 1 false)
                 afn (binding [*done* done] 
-                      (saw (midi->freq note-num) (/ velocity 127)))]
+                      (saw (midi->freq note-num) (/ (double velocity) 127.0)))]
             (aset active note-num done)
             (add-afunc afn))                        ;; <= add-afunc
 
