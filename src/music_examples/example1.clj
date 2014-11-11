@@ -4,20 +4,49 @@
     [score.bpf :refer :all]
     [score.freq :refer :all])  
   (:require [pink.simple :refer :all]
+            [pink.engine :refer :all]
             [pink.envelopes :refer :all]
             [pink.oscillators :refer :all]
             [pink.space :refer :all]
             [pink.util :refer :all]
-            [pink.event :refer :all]))
+            [pink.event :refer :all])
+  (:import [clojure.lang IFn]))
 
 ;; Example 1 - Basic Engine Use - Add/Remove Audio Functions
 
+
+(comment
+
+  ; Create Pink Audio Engine
+  (def eng (engine-create :nchnls 2))  
+
+  ; Start Pink Audio Engine
+  (engine-start eng)
+
+  ; Create Panned, Sine Audio Function
+  (def s (pan (sine 440.0)
+              0.0))
+
+  (instance? IFn s)
+
+  ; Add Sine s to Audio Engine
+  (engine-add-afunc eng s)
+
+  ; Remove Sine s from Audio Engine
+  (engine-remove-afunc eng s)
+
+  ; Stop Pink Audio Engine
+  (engine-stop eng)
+  
+  )
+
+;; Using pink.simple convenience namespace 
 (comment
 
   ; Start Default Pink Audio Engine
   (start-engine)  
 
-  ; Create Sine Audio Function
+  ; Create Panned, Sine Audio Function
   (def s (pan (sine 440.0)
               0.0))
 
@@ -32,12 +61,15 @@
   
   )
 
+
+
 (defn fm-bell 
   "Simple frequency-modulation bell"
   [freq]
   (let-s [e (xar 0.0001 1.3)] 
     (mul
-        (sine2 (sum freq (mul freq (sine (* 4.77 freq)))))
+        (sine2 (sum freq 
+                    (mul freq (sine2 (* 4.77 freq)))))
         (mul 0.05 e))))
 
 (defn score->events
@@ -57,10 +89,4 @@
       (start-engine)
       (add-audio-events events)
       (add-events (event stop-engine 6.0))
-      ;(Thread/sleep 6000)
-      ;(stop-engine)
-      ;(clear-engine)
-      
-      )
-
-  )
+      ))

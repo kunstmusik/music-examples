@@ -81,19 +81,22 @@
            (range 1 3 0.5))
       20.0)))
 
+
 (defn my-score3 [amp base-freq] 
-  (loop [indx 0 start 0.0 dur 40.0 score []] 
-    (let-s [w (env [0.0 1.0 (- dur 6) 2.0 6 2.0])
-            amp-env (env [0.0 0.0 (- dur 6) amp 5 amp 1.0 0.0])]  
-      (if (< indx 5) 
-        (recur (unchecked-inc indx) (+ start 5.0) (- dur 5.0) 
-               (concat score (gen-notes
-                 (repeat table-synth) 
-                 start 
-                 (repeat amp-env) 
-                 (map #(mul (* % base-freq (inc indx)) w) (range 1 3 0.5))
-                 dur)))
-        score))))
+  (mapcat 
+    (fn [indx] 
+      (let [start (* 5.0 indx)
+           dur (- 40.0 start)] 
+       (let-s [w (env [0.0 1.0 (- dur 6) 2.0 6 2.0])
+               amp-env (env [0.0 0.0 (- dur 6) amp 5 amp 1.0 0.0])]  
+         (gen-notes
+           (repeat table-synth) 
+           start 
+           (repeat amp-env) 
+           (map #(mul (* % base-freq (inc indx)) w) (range 1 3 0.5))
+           dur))))
+    (range 5)
+    ))
 
 (comment
 
