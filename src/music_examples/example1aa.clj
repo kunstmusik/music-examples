@@ -104,8 +104,8 @@
           (let [done (boolean-array 1 false)
                 afn (binding [*done* done] 
                       ;(additive (midi->freq note-num) (/ (double velocity) 127.0)))]
-                      ;(saw (midi->freq note-num) (/ (double velocity) 127.0)))]
-                      (fm (midi->freq note-num) (/ (double velocity) 127.0)))]
+                      (saw (midi->freq note-num) (/ (double velocity) 127.0)))]
+                      ;(fm (midi->freq note-num) (/ (double velocity) 127.0)))]
             (aset active note-num done)
             (add-afunc afn))                        ;; <= add-afunc
 

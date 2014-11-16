@@ -14,11 +14,9 @@
 
 
 (defn table-synth [amp freq dur]
-  (pan 
-    (mul
-     (oscili amp freq)
-     (env [0.0 0.0, 0.05 1, 0.02 0.5, dur 0.5, 0.2 0]))
-    0.0))
+  (-> (oscili amp freq)
+      (mul (env [0.0 0.0, 0.05 1, 0.02 0.5, dur 0.5, 0.2 0]))
+      (pan 0.0)))
 
 (defn score->events
   [score]
@@ -120,7 +118,7 @@
   (clear-engine)  
 
   ;; Group Glissandi
-  (schedule (my-score3 0.1 110.0))
+  (schedule (pprint (my-score3 0.1 110.0)))
   
   (stop-engine)
   )

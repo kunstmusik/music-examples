@@ -48,7 +48,7 @@
   [^long keynum]
   (when-let [sample (samples keynum)] 
     (let [dur (get-duration sample)]
-     (add-afunc
+     (add-afunc                                     ;; add-afunc
       (pan 
         (mul (env [0 0 0.001 0.5 (- dur 0.002) 0.5 0.001 0])
              (oscili 1.0 (/ 1.0 dur) 

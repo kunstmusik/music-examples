@@ -5,7 +5,7 @@
             [pink.space :refer :all]
             [pink.oscillators :refer :all]
             [pink.envelopes :refer [env xar]]
-            [pink.filters :refer [port butterlp moogladder]]
+            [pink.filters :refer :all]
             [pink.util :refer :all]
             [primitive-math :refer [not==]]
             )
@@ -43,11 +43,15 @@
         (println ">> " cmd " " note-num " " velocity)
         (condp = cmd
           ShortMessage/NOTE_ON
+          ;; On note on, create a saw function, record it in the active array
+          ;; by key number, then add it to the engine
           (let [afn (saw (midi->freq note-num) (/ velocity 127.0))]
             (aset active note-num afn)
             (add-afunc afn))                        ;; <= add-afunc
 
           ShortMessage/NOTE_OFF
+          ;; On note off, if an audio function found by key number,  
+          ;; remove it from the active array and also from the engine 
           (when-let [afn (aget active note-num)]
             (remove-afunc afn)                      ;; <= remove-afunc 
             (aset active note-num afn)))
