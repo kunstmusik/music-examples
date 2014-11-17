@@ -118,7 +118,7 @@
   (clear-engine)  
 
   ;; Group Glissandi
-  (schedule (pprint (my-score3 0.1 110.0)))
+  (schedule (my-score3 0.1 110.0))
   
   (stop-engine)
   )
