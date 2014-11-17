@@ -26,9 +26,10 @@
 ; Instrument function
 (defn saw
   [freq amp]
-  (pan (mul amp 
-            (blit-saw freq))
-       0.0))
+  (->
+    (blit-saw freq)
+    (mul amp)
+    (pan 0.0)))
 
 (comment
   ;; Bind Hardware device to virtual device
@@ -56,8 +57,6 @@
             (remove-afunc afn)                      ;; <= remove-afunc 
             (aset active note-num afn)))
         )))
-
-
 
   (start-engine)                                    ;; start-engine
   
