@@ -54,8 +54,7 @@
   [^double freq amp]
   (let [fm-index 0.9 
         mod-mult 1.0 
-        mod-freq (* freq mod-mult)
-        ]
+        mod-freq (* freq mod-mult)]
     (let-s [e (adsr 0.04 0.03 0.9 3.0)] 
     (->
       (sine2 (sum freq (mul freq fm-index e 
@@ -89,7 +88,7 @@
       (pan 0.0))))
 
 ;; Subtractive Synthesis
-(defn saw
+(defn subtractive 
   [freq amp]
   (let [ampfn (mul amp (adsr 0.05 0.3 0.9 4.0))] 
     (let-s [f (sum freq (mul freq 0.0025 (sine 4)))] 
@@ -114,13 +113,13 @@
          lfeedback (create-buffer 0.0)
          rfeedback (create-buffer 0.0)
          ldelay (->
-                  (feedback-read lfeedback)
+                  (feedback-read rfeedback)
                   (mul left-amp-mod) 
                   (sum ain)
                   (adelay left-delay-time)
                   (feedback-write lfeedback))
          rdelay  (->
-                  (feedback-read rfeedback)
+                  (feedback-read lfeedback)
                   (mul right-amp-mod) 
                   (sum ain)
                   (adelay right-delay-time)
@@ -138,15 +137,15 @@
 
 ;; Create vector of patches to choose from
   (def patches 
-    [fm additive saw])
+    [fm additive subtractive])
 
 ;; setup ping-pong delay graph
-  (def delay-node  (create-node))
-  (def delay-processor (shared (node-processor delay-node)))
+  (def sub-node  (create-node))
+  (def sub-note-processor (shared (node-processor delay-node)))
 
-  (add-afunc (pan delay-processor 0.0))
-  (add-afunc (ping-pong-delay delay-processor 
-                               0.57 0.9 0.43 0.8))
+  (add-afunc (pan sub-note-processor 0.0))
+  (add-afunc (ping-pong-delay sub-node-processor 
+                               0.5 0.9 0.25 0.8))
 
 (bind-key-func
   keyboard 0
