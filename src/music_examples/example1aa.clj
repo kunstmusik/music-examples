@@ -56,12 +56,12 @@
         mod-mult 1.0 
         mod-freq (* freq mod-mult)]
     (let-s [e (adsr 0.04 0.03 0.9 3.0)] 
-    (->
-      (sine2 (sum freq (mul freq fm-index e 
-                            (sine2 mod-freq))))
-      (mul amp e)
-      (pan 0.0)
-      ))))
+      (->
+        (sine2 (sum freq (mul freq fm-index e 
+                              (sine2 mod-freq))))
+        (mul amp e)
+        (pan 0.0)
+        ))))
 
 
 ;; Additive Synthesis
@@ -141,9 +141,9 @@
 
 ;; setup ping-pong delay graph
   (def sub-node  (create-node))
-  (def sub-note-processor (shared (node-processor delay-node)))
+  (def sub-node-processor (shared (node-processor sub-node)))
 
-  (add-afunc (pan sub-note-processor 0.0))
+  (add-afunc (pan sub-node-processor 0.0))
   (add-afunc (ping-pong-delay sub-node-processor 
                                0.5 0.9 0.25 0.8))
 
@@ -160,8 +160,8 @@
                     (patch-fn (midi->freq note-num) 
                            (/ (double velocity) 127.0)))]
           (aset active note-num done)
-          (add-afunc afn)                         ;; <= add-afunc 
-          ;(node-add-func delay-node afn) 
+          ;(add-afunc afn)                         ;; <= add-afunc 
+          (node-add-func sub-node afn) 
           
           )
 
