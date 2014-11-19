@@ -14,8 +14,8 @@
            [java.util Arrays]
            [clojure.lang IFn]))
 
-;; Example 1a - Basic Engine Use - Add/Remove Audio Functions
-;;   MIDI Keyboard
+;; Example 2 - Basic Engine Use - Add/Remove Audio Functions
+;; Basic MIDI Keyboard
 
 ; Create a Pink MIDI Manager
 (def midim (create-midi-manager))

@@ -1,4 +1,4 @@
-(ns music-examples.clocks
+(ns music-examples.example4
   (:require [score.core :refer :all]
             [score.bpf :refer :all]
             [score.freq :refer :all])  
@@ -11,6 +11,8 @@
             [pink.oscillators :refer :all]
             [pink.space :refer :all]
             [pink.event :refer :all]))
+
+
 
 ;; Instrument Definitions
 (defn instr-square

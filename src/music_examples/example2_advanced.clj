@@ -15,10 +15,12 @@
            [java.util Arrays]
            [clojure.lang IFn]))
 
-;; Example 1aa - Basic Engine Use - Add/Remove Audio Functions
-;;   MIDI Keyboard (more developed)
+;; Example 2 - Advanced - MIDI Keyboard (more developed)
 
+; Create a Pink MIDI Manager
 (def midim (create-midi-manager))
+
+; Register a virtual device
 (def keyboard (add-virtual-device midim "keyboard 1")) 
 
 ;; Setup reader functions for MIDI Control Change values
@@ -37,11 +39,12 @@
             (Arrays/fill out new-v))))
       out)))
 
-
+;; Grab value atoms for MIDI CC from Virtual Device
 (def patch-number (get-midi-cc-atom keyboard 0 1))
 (def cutoff-depth (get-midi-cc-atom keyboard 0 2))
 (def resonance (get-midi-cc-atom keyboard 0 3))
 
+;; Create shared, smoothing UGen readers for atoms 
 (def cdepth-fn (shared (port (midi-atom-reader cutoff-depth 0.0 16.0) 0.05)))
 (def resonance-fn (shared (port (midi-atom-reader resonance 0.0 1.0) 0.05)))
 
@@ -49,7 +52,7 @@
 ;; Synthesizer Note Instance Function
 ;; Frequency Modulation
 (defn fm
-  "Simple frequency-modulation sound with 2:1 cm ratio"
+  "Simple frequency-modulation sound with 1:1 cm ratio"
   [^double freq amp]
   (let [fm-index 0.9 
         mod-mult 1.0 
@@ -146,6 +149,7 @@
   (add-afunc (ping-pong-delay sub-node-processor 
                                0.5 0.9 0.25 0.8))
 
+;; Bind MIDI Keyboard Events to function
 (bind-key-func
   keyboard 0
   (let [active ^"[[Z" (make-array Boolean/TYPE 128 1)] 
@@ -159,8 +163,8 @@
                     (patch-fn (midi->freq note-num) 
                            (/ (double velocity) 127.0)))]
           (aset active note-num done)
-          ;(add-afunc afn)                         ;; <= add-afunc 
-          (node-add-func sub-node afn) 
+          (add-afunc afn)                         ;; <= add-afunc 
+          ;(node-add-func sub-node afn) 
           
           )
 
