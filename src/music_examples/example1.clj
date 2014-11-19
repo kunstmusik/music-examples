@@ -9,8 +9,6 @@
   (:import [clojure.lang IFn]))
 
 ;; Example 1 - Basic Engine Use - Add/Remove Audio Functions
-
-
 (comment
 
   ; Create Pink Audio Engine
@@ -20,8 +18,8 @@
   (engine-start eng)
 
   ; Create Panned, Sine Audio Function
-  (def s (pan (sine 440.0)
-              0.0))
+  (def s 
+    (pan (sine 440.0) 0.0))
 
   (instance? IFn s)
 
@@ -43,8 +41,8 @@
   (start-engine)  
 
   ; Create Panned, Sine Audio Function
-  (def s (pan (sine 440.0)
-              0.0))
+  (def s 
+    (pan (sine 440.0) 0.0))
 
   ; Add Sine s to Default Audio Engine
   (add-afunc s)

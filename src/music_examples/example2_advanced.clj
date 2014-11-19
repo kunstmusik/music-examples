@@ -1,4 +1,4 @@
-(ns music-examples.example1aa 
+(ns music-examples.example2-advanced 
   (:require [pink.simple :refer :all] 
             [pink.io.midi :refer :all]
             [pink.config :refer :all]
@@ -9,8 +9,7 @@
             [pink.filters :refer [port butterlp moogladder]]
             [pink.delays :refer :all]
             [pink.util :refer :all]
-            [primitive-math :refer [not==]]
-            )
+            [primitive-math :refer [not==]])
   (:import [javax.sound.midi MidiSystem Transmitter Receiver MidiMessage
             ShortMessage ]
            [java.util Arrays]

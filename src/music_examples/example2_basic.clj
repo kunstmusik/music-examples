@@ -1,4 +1,4 @@
-(ns music-examples.example1a
+(ns music-examples.example2-basic
   (:require [pink.simple :refer :all] 
             [pink.io.midi :refer :all]
             [pink.config :refer :all]

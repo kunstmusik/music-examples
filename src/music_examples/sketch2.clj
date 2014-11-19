@@ -1,4 +1,4 @@
-(ns music-examples.example2
+(ns music-examples.sketch2
   (:require 
     [score.core :refer :all]
     [score.bpf :refer :all]
