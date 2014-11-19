@@ -10,7 +10,7 @@
   (:require [pink.simple :refer :all]
             [pink.config :refer :all]
             [pink.envelopes :refer [env exp-env adsr xar]]
-            [pink.oscillators :refer [oscili]]
+            [pink.oscillators :refer :all]
             [pink.util :refer :all]
             [pink.instruments.horn :refer :all]
             [pink.space :refer :all]
@@ -21,6 +21,22 @@
   (-> 
     (horn (mul amp (adsr 0.02 0.04 0.95 0.1)) freq) 
     (pan loc)))
+
+(defn fm
+  "Simple frequency-modulation sound with 1:1 cm ratio"
+  [amp freq loc]
+  (let [fm-index 0.9 
+        mod-mult 1.0 
+        mod-freq (mul freq mod-mult)]
+    (let-s [e (adsr 0.04 0.03 0.9 3.0)] 
+      (->
+        (sine2 (sum freq (mul freq fm-index e 
+                              (sine2 mod-freq))))
+        (mul amp e)
+        (pan loc)
+        ))))
+
+
 
 (start-engine)
 
@@ -100,7 +116,7 @@
   (defn mirror [s]
     (into s (rest (reverse (rest s)))))
 
-  (defn score-gamma-chord []
+  (defn score-gamma1 []
     (with-afunc instr-horn 
       (gen-notes
         (range 0 8 0.25)
@@ -122,57 +138,21 @@
         0.0
         )))
 
-  (add-audio-events (score-gamma-chord))
+  (add-audio-events (score-gamma1))
   (add-audio-events (score-gamma2))
 
-  )
 
+  ;; Higher Order Events
 
+  (add-audio-events 
+    (i fm 0 2 0.5 440 0.0))
 
-(comment
+  (add-audio-events 
+    (i fm 0 2 0.5 (env [0.0 440 2.0 880 8.0 880]) 0.0))
 
-  (start-engine)
+  (add-audio-events 
+    (i fm 0 4 0.5 (env [0.0 440 8.0 500 8.0 500]) 0.0)
+    (i fm 0 4 0.5 (env [0.0 440 8.0 600 8.0 600]) 0.0)
+    (i fm 0 4 0.5 (env [0.0 440 8.0 700 8.0 700]) 0.0))
 
-  (def score-12TET
-    (gen-notes 
-      (repeat instr-horn)
-      (range 0 10 0.5)
-      0.25
-      (map #(pch->freq TWELVE-TET [8 %]) (range 0 20))
-      0.0
-      ))
-
-  (def gamma-scale 
-    (create-tuning-from-file 
-      (resource "carlos_gamma.scl")))
-
-  (def score-gamma
-    (gen-notes 
-      (repeat instr-horn)
-      (range 0 20 0.5)
-      0.25
-      (map #(pch->freq gamma-scale [8 %]) (range 0 35))
-      0.0
-      ))
-
-  (def chord1 [0 4 9 15])
-  (def chord2 [0 3 7 12])
-  (def chord3 [0 4 9 17])
-
-  (defn score-gamma-chord []
-    (gen-notes
-      (repeat instr-horn) 
-      (range 0 16 0.25)
-      0.25
-      (map #(pch->freq gamma-scale [8 %]) (cycle [0 7 13 18 22]))
-      0.0
-      )
-    )
-
-  (schedule score-12TET)
-  (schedule score-gamma)
-  (schedule (score-gamma-chord))
-
-  (stop-engine)
-
-  )
+)
