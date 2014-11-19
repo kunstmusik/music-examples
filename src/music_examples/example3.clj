@@ -1,4 +1,4 @@
-(ns music-examples.example-tunings
+(ns music-examples.example3
   (:require [clojure.java.io :refer [resource]]
             [clojure.pprint :refer [pprint]])
   (:require [score.core :refer :all]
@@ -16,6 +16,7 @@
             [pink.space :refer :all]
             [pink.event :refer :all]))
 
+;; Instrument Functions
 (defn instr-horn
   [amp freq loc]
   (-> 
@@ -35,8 +36,6 @@
         (mul amp e)
         (pan loc)
         ))))
-
-
 
 (start-engine)
 
@@ -113,9 +112,11 @@
     (create-tuning-from-file 
       (resource "carlos_gamma.scl")))
 
+  ;; Utility to create mirrored sequence
   (defn mirror [s]
     (into s (rest (reverse (rest s)))))
 
+  ;; Use Score gen-notes to generate arpeggiating pattern
   (defn score-gamma1 []
     (with-afunc instr-horn 
       (gen-notes
@@ -127,6 +128,8 @@
         0.0
         )))
 
+  ;; Use Score gen-notes to generate arpeggiating pattern
+  ;; score block starts beginning at 4 seconds
   (defn score-gamma2 []
     (with-afunc instr-horn
       (gen-notes
@@ -138,6 +141,7 @@
         0.0
         )))
 
+  ;; Evaluate together
   (add-audio-events (score-gamma1))
   (add-audio-events (score-gamma2))
 
