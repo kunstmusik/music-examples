@@ -1,4 +1,4 @@
-(ns music-examples.example3
+(ns music-examples.grains
   (:require [score.core :refer :all]
             [score.bpf :refer :all]
             [score.freq :refer :all])  
