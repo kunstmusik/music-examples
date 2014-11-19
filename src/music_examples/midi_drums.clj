@@ -1,4 +1,4 @@
-(ns music-examples.example1b
+(ns music-examples.midi-drums
   (:require [pink.simple :refer :all] 
             [pink.io.midi :refer :all]
             [pink.io.sound-file :refer :all]
@@ -14,8 +14,7 @@
            [java.util Arrays]
            [clojure.lang IFn]))
 
-;; Example 1b - Basic Engine Use - Add/Remove Audio Functions
-;;   MIDI Drum Machine
+;;   MIDI Drum Machine (configured to work with pads on Akai MPK mini2)
 
 (def midim (create-midi-manager))
 (def keyboard (add-virtual-device midim "keyboard 1")) 
