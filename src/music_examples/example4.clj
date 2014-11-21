@@ -12,8 +12,6 @@
             [pink.space :refer :all]
             [pink.event :refer :all]))
 
-
-
 ;; Instrument Definitions
 (defn instr-square
   [amp freq loc]
@@ -25,18 +23,18 @@
       (pan loc))))
 
 (defn fm
-  "Simple frequency-modulation sound with 2:1 cm ratio"
+  "Simple frequency-modulation sound with 1.77:1 cm ratio"
   [^double freq amp]
   (let [fm-index 0.4 
         mod-mult 1.77 
         mod-freq (* freq mod-mult)]
     (let-s [e (xar 0.02 2.0)] 
-    (->
-      (sine2 (sum freq (mul freq fm-index e 
-                            (sine2 mod-freq))))
-      (mul amp e)
-      (pan 0.0)
-      ))))
+      (->
+        (sine2 (sum freq (mul freq fm-index e 
+                              (sine2 mod-freq))))
+        (mul amp e)
+        (pan 0.0)
+        ))))
 
 (defn subtractive 
   [freq amp cutoff res]
@@ -86,47 +84,57 @@
         (when perf-fn 
           (perf-fn)) 
         (aset counter 0 (rem (inc indx) len))) 
-     true)))
+      true)))
 
 (start-engine)
 
+;; Tempo: 47 BPM, times 4 to get triggers every 16th note
+(def tempo (atom (* 47.0 4)))
+
+;; Pattern filled with vectors of fn's
+(def bd-pattern (atom []))
+
+;; Set initial pattern
+(reset! 
+  bd-pattern 
+  [bd nil nil nil 
+   nil nil nil nil
+   bd nil nil nil
+   nil nil nil nil])
+
+
+;; Performance Functions (to use as pattern triggers)
+(defn play-fn 
+  [dur amp loc]
+  (add-audio-events 
+    (i instr-square 0.0 dur amp (env [0.0 100 0.1 40 (- dur 0.1) 40]) loc)))
+
+(defn play-fm
+  [dur freq amp]
+  (add-audio-events
+    (i fm 0.0 dur freq amp)))
+
+
+(defn wahwah
+  [dur notename amp cutoff res]
+  (add-audio-events
+    (i subtractive 0.0 dur (keyword->freq notename) amp cutoff res)))
+
+;; Customizing trigger functions using partial
+(def bd (partial play-fn 1.0 0.6 0.0))
+
+(def fmfm (partial play-fm 0.3))
+
+;; player is the trigger function for the clock
+(def player (pattern-player bd-pattern))
+
+;; clock will trigger the player function at the given tempo
+(def clock (create-clock tempo player))
+
+;; register the control function with the engine
+(add-post-cfunc clock)
+
 (comment
-
-  ;; Tempo: 47 BPM, times 4 to get triggers every 16th note
-  (def tempo (atom (* 47.0 4)))
-
-  ;; Pattern filled with vectors of fn's
-  (def bd-pattern (atom []))
-
-  ;; Performance Functions (to use as pattern triggers)
-  (defn play-fn 
-    [dur amp loc]
-    (add-audio-events 
-      (i instr-square 0.0 dur amp (env [0.0 100 0.1 40 (- dur 0.1) 40]) loc)))
-
-  (defn play-fm
-    [dur freq amp]
-    (add-audio-events
-      (i fm 0.0 dur freq amp)))
-
-
-  (defn wahwah
-    [dur notename amp cutoff res]
-    (add-audio-events
-      (i subtractive 0.0 dur (keyword->freq notename) amp cutoff res)))
-
-  ;; Customizing trigger functions using partial
-  (def bd (partial play-fn 1.0 0.6 0.0))
-
-  (def fmfm (partial play-fm 0.3))
-
-  ;; Set initial pattern
-  (reset! 
-    bd-pattern 
-    [bd nil nil nil 
-     nil nil nil nil
-     bd nil nil nil
-     nil nil nil nil])
 
   ;; Set modified pattern
   (reset! 
@@ -149,14 +157,6 @@
   (wahwah 4.0 :E5 0.3 (sum 1000 (mul 750 (sine 2))) 0.25)
 
 
-  ;; player is the trigger function for the clock
-  (def player (pattern-player bd-pattern))
-
-  ;; clock will trigger the player function at the given tempo
-  (def clock (create-clock tempo player))
-
-  ;; register the control function with the engine
-  (add-post-cfunc clock)
 
   (remove-post-cfunc clock)
 
