@@ -1,6 +1,6 @@
 # music-examples
 
-Examples for using Pink and Score.
+Examples for using [Pink](http://github.com/kunstmusik/pink) and [Score](http://github.com/kunstmusik/score).
 
 ## License
 
