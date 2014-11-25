@@ -4,6 +4,7 @@
             [score.freq :refer :all])  
   (:require [pink.simple :refer :all]
             [pink.config :refer :all]
+            [pink.control :refer :all]
             [pink.filters :refer :all]
             [pink.envelopes :refer :all]
             [pink.util :refer :all]
@@ -51,25 +52,6 @@
 
 
 ;; Control Functions
-(defn create-clock
-  "Sample-accurate clock that triggers a trigger-fn according to the tempo 
-  held within the tempo-atm.  When the time has been met, it will call the 
-  given trigger-fn and truncate the running sample-count."
-  [tempo-atm trigger-fn]
-  (let [sr (double *sr*)
-        buffer-size (long *buffer-size*)
-        init-val (long (* sr (/ 60.0 (double @tempo-atm)))) 
-        ^longs sample-count (long-array 1 init-val)]
-    (fn []
-      (let [num-samples-to-wait (long (* sr (/ 60.0 (double @tempo-atm))))
-            cur-samp (aget sample-count 0)]
-        (if (>= cur-samp num-samples-to-wait)
-          (do 
-            (aset sample-count 0 (rem cur-samp num-samples-to-wait))
-            (trigger-fn))
-          (aset sample-count 0 (+ cur-samp buffer-size))))  
-      true
-      )))
 
 (defn pattern-player
   "When trigger, checks within vector in pattern-atom at the current counter
@@ -93,14 +75,6 @@
 
 ;; Pattern filled with vectors of fn's
 (def bd-pattern (atom []))
-
-;; Set initial pattern
-(reset! 
-  bd-pattern 
-  [bd nil nil nil 
-   nil nil nil nil
-   bd nil nil nil
-   nil nil nil nil])
 
 
 ;; Performance Functions (to use as pattern triggers)
@@ -129,7 +103,17 @@
 (def player (pattern-player bd-pattern))
 
 ;; clock will trigger the player function at the given tempo
-(def clock (create-clock tempo player))
+(def clock-state (atom :running))
+(def clock (create-clock tempo player clock-state))
+;(def clock (create-clock tempo player clock-state #(println "DONE FROM CLOCK")))
+
+;; Set initial pattern
+(reset! 
+  bd-pattern 
+  [bd nil nil nil 
+   nil nil nil nil
+   bd nil nil nil
+   nil nil nil nil])
 
 ;; register the control function with the engine
 (add-post-cfunc clock)
@@ -155,8 +139,6 @@
   (wahwah 3.0 :C2 0.3 (sum 1000 (mul 750 (sine 6))) 0.25)
   (wahwah 3.0 :Db5 0.3 (sum 1000 (mul 750 (sine 4))) 0.25)
   (wahwah 4.0 :E5 0.3 (sum 1000 (mul 750 (sine 2))) 0.25)
-
-
 
   (remove-post-cfunc clock)
 
