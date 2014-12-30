@@ -4,7 +4,7 @@
   (:require [pink.simple :refer :all]
             [pink.config :refer :all]
             [pink.envelopes :refer [xar]]
-            [pink.util :refer [mul]]
+            [pink.util :refer [mul !r!]]
             [pink.instruments.horn :refer :all]
             [pink.space :refer :all]
             [pink.event :refer :all]))
@@ -53,7 +53,7 @@
     (when x
       (add-afunc (instr-horn x loc)) 
       (when xs
-        (add-events [(event perf-func (apply-tempo @tempo-atom dur) loc dur xs (atom tempo-atom))]))
+        (add-events [(event perf-func (apply-tempo @tempo-atom dur) loc dur xs (!r! tempo-atom))]))
       ))
 
 
@@ -61,11 +61,11 @@
   (def tempo2 (atom 60.0))
 
 
-  (add-events (event perf-func 0.0 [0.25 0.5 score (atom tempo)]))
-  (add-events (event perf-func 0.0 [0.0 0.25 score2 (atom tempo)]))
-  (add-events (event perf-func 0.0 [-0.25 0.5 score3 (atom tempo)]))
-  (add-events (event perf-func 0.0 [1 0.25 score4 (atom tempo2)]))
-  (add-events (event perf-func 0.05 [-1 0.2 score4 (atom tempo2)]))
+  (add-events (event perf-func 0.0 [0.25 0.5 score (!r! tempo)]))
+  (add-events (event perf-func 0.0 [0.0 0.25 score2 (!r! tempo)]))
+  (add-events (event perf-func 0.0 [-0.25 0.5 score3 (!r! tempo)]))
+  (add-events (event perf-func 0.0 [1 0.25 score4 (!r! tempo2)]))
+  (add-events (event perf-func 0.05 [-1 0.2 score4 (!r! tempo2)]))
 
   (reset! tempo 80.0)
 
