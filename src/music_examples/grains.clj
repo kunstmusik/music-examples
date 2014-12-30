@@ -1,6 +1,5 @@
 (ns music-examples.grains
   (:require [score.core :refer :all]
-            [score.bpf :refer :all]
             [score.freq :refer :all])  
   (:require [pink.simple :refer :all]
             [pink.config :refer :all]
@@ -50,11 +49,11 @@
 
   (defn perf-func 
     "control-function that plays score blocks over time"
-    [loc dur [x & xs] tempo]
+    [loc dur [x & xs] tempo-atom]
     (when x
       (add-afunc (instr-horn x loc)) 
       (when xs
-        (add-events [(event perf-func (apply-tempo @tempo dur) loc dur xs tempo)]))
+        (add-events [(event perf-func (apply-tempo @tempo-atom dur) loc dur xs (atom tempo-atom))]))
       ))
 
 
@@ -62,11 +61,11 @@
   (def tempo2 (atom 60.0))
 
 
-  (add-events (event perf-func 0.0 [0.25 0.5 score tempo]))
-  (add-events (event perf-func 0.0 [0.0 0.25 score2 tempo]))
-  (add-events (event perf-func 0.0 [-0.25 0.5 score3 tempo]))
-  (add-events (event perf-func 0.0 [1 0.25 score4 tempo2]))
-  (add-events (event perf-func 0.05 [-1 0.2 score4 tempo2]))
+  (add-events (event perf-func 0.0 [0.25 0.5 score (atom tempo)]))
+  (add-events (event perf-func 0.0 [0.0 0.25 score2 (atom tempo)]))
+  (add-events (event perf-func 0.0 [-0.25 0.5 score3 (atom tempo)]))
+  (add-events (event perf-func 0.0 [1 0.25 score4 (atom tempo2)]))
+  (add-events (event perf-func 0.05 [-1 0.2 score4 (atom tempo2)]))
 
   (reset! tempo 80.0)
 
