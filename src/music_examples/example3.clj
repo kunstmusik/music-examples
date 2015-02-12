@@ -2,9 +2,8 @@
   (:require [clojure.java.io :refer [resource]]
             [clojure.pprint :refer [pprint]])
   (:require [score.core :refer :all]
-            [score.bpf :refer :all]
             [score.amp :refer :all]
-            [score.freq :refer :all]
+            [score.freq :exclude [pch->freq]]
             [score.tuning :refer :all]
             [score.util :refer :all])  
   (:require [pink.simple :refer :all]

@@ -1,7 +1,6 @@
 (ns music-examples.sketch2
   (:require 
     [score.core :refer :all]
-    [score.bpf :refer :all]
     [score.freq :refer :all])  
   (:require [pink.simple :refer :all]
             [pink.config :refer :all]
