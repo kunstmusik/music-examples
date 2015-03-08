@@ -1,5 +1,5 @@
 (ns music-examples.plotting
-  (:require [pink.util :refer [shared arg mul with-duration]]
+  (:require [pink.util :refer [shared arg mul with-duration create-buffer generator]]
             [pink.config :refer  [*buffer-size* *current-buffer-num* *sr*]]
             [pink.envelopes :refer :all]
             [pink.gen :refer  [gen9 gen17]]
@@ -58,7 +58,27 @@
 
 ;(visualize (with-duration 2.0 (adsr 0.02 0.05 0.9 0.5)))
 
-(visualize (with-duration 2.0 (adsr 0.5 0.5 0.8 0.5)))
+;(visualize (with-duration 2.0 (adsr 0.5 0.5 0.8 0.5)))
+
+(visualize (mul (env [0.0 1.0 0.05 1.0]) 
+                (blit-pulse (env [0.0 220 1.0 220]) 0.5)))
+
+(visualize (mul (env [0.0 1.0 0.05 1.0]) 
+                (blit-pulse 220 0.5)))
+
+
+;(visualize (mul (env [0.0 1.0 0.3 1.0]) 
+;                (blit-triangle 440))
+;           (mul (env [0.0 1.0 0.3 1.0]) 
+;                (blit-square 440))
+;           )
+
+
+;(visualize (mul (env [0.0 1.0 0.3 1.0]) 
+;                (blit-square-static-1 440 0))
+;           (mul (env [0.0 1.0 0.3 1.0]) 
+;                (blit-square-static-2 440 0))
+;           )
 
 ;(let [amp 0.5
 ;      freq 220
