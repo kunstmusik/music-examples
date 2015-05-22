@@ -3,8 +3,7 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  ;:jvm-opts ^:replace  []
-  :jvm-opts ;["-server" "-Xmx2g" "-XX:-UseParallelGC"]
+  :jvm-opts 
   ^:replace
   ["-server"
    "-Xmx512m"           ; Minimum and maximum sizes of the heap
@@ -35,7 +34,7 @@
 
               :profiling  {
                            :plugins  [[lein-nodisassemble "0.1.3"]] 
-                           :dependencies  [[org.clojure/clojure "1.7.0-alpha3"]] 
+                           :dependencies  [[org.clojure/clojure "1.7.0-RC1"]] 
                            :global-vars  {*warn-on-reflection* true
                                           *unchecked-math* :warn-on-boxed
                                           }      

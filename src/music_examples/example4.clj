@@ -10,7 +10,9 @@
             [pink.instruments.horn :refer :all]
             [pink.oscillators :refer :all]
             [pink.space :refer :all]
-            [pink.event :refer :all]))
+            [pink.event :refer :all]
+            [pink.gen :refer [gen-sine]]
+            ))
 
 ;; Instrument Definitions
 (defn instr-square
@@ -67,7 +69,7 @@
         (aset counter 0 (rem (inc indx) len))) 
       true)))
 
-(start-engine)
+;(start-engine)
 
 ;; Tempo: 47 BPM, times 4 to get triggers every 16th note
 (def tempo (atom (* 47.0 4)))
@@ -116,6 +118,24 @@
 
 ;; register the control function with the engine
 (add-post-cfunc clock)
+
+(def table-s (gen-sine 8192))
+(def counter (atom 0))
+(def my-engine 
+  (engine-create :nchnls 2))
+(defn add-sines  []
+  (do 
+    (swap! counter inc)
+    (println "oscillators: " (* 10 @counter))
+    (doseq [a (range 10)]
+      (engine-add-afunc my-engine (oscili 0.001 440 table-s)) 
+      ;(engine-add-afunc my-engine (mul 0.001 (sine 440 0.0))) 
+      )))
+(comment
+  (engine-start my-engine)
+(add-sines)
+(engine-clear my-engine)
+(engine-stop my-engine))
 
 (comment
 
