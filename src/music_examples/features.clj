@@ -27,26 +27,29 @@
   ([freq amp]
    (fm freq amp 0.4 1.77))
   ([freq amp fm-index mod-mult]
-  (let [mod-freq (mul freq mod-mult)]
-    (let-s [e (adsr 0.02 2.0 0.0 0.01)] 
+  (let [freq (shared (arg freq)) 
+        mod-freq (mul freq mod-mult)]
+    (let-s [e (if (fn? amp) 
+                amp
+                (mul amp (adsr 0.02 2.0 0.0 0.01)))] 
       (->
         (sine2 (sum freq (mul freq fm-index e 
                               (sine2 mod-freq))))
-        (mul amp e)
-        ;(pan 0.0)
+        (mul e)
         )))))
 
 
 (defn ringm 
   "Simple instrument with ring-modulation"
   ([freq amp]
-   (let-s [e (adsr 0.04 2.0 0.0 0.01)] 
+   (let [e (if (fn? amp) 
+             amp
+             (adsr 0.04 2.0 0.0 0.01))] 
      (->
        (ringmod 
          (blit-saw freq)
          (sine2 (mul freq 2.0)))
        (mul amp e)
-       ;(pan 0.0)
        ))))
 
 ;; AUDIO GRAPH SETUP 
@@ -66,8 +69,8 @@
 ;; PERFORMANCE FUNCTIONS 
 ;; =====================
 
-(defn mix-afn [afn]
-  (let-s [sig (pan afn 0.2)] 
+(defn mix-afn [afn loc]
+  (let-s [sig (pan afn loc)] 
     (node-add-func
       dry-node 
       (apply-stereo mul sig 0.7))
@@ -77,12 +80,13 @@
   nil)
 
 (defn perf-fm [dur & args] 
+  (println args)
   (binding [*duration* dur] 
-    (mix-afn (apply fm args))))
+    (mix-afn (apply!*! fm args) -0.1)))
 
 (defn perf-ringm [dur & args]
   (binding [*duration* dur] 
-    (mix-afn (apply ringm args))))
+    (mix-afn (apply!*! ringm args) 0.1)))
 
 (defn s [afn start dur & args]
   (event #(apply afn dur args) start ))
@@ -103,32 +107,29 @@
 ;; Set tempo of engine
 (set-tempo 54)
 
-;; Score in measured-score foringmat
+;; glissandi score fragment
+(def gliss-fragment
+  (map #(into [perf-fm] %) 
+       (gen-notes
+         0.0 6.0 
+         (->> 
+           [:A4 :C5 :C#5 :E5]
+           (map keyword->freq)
+           (map #(!*! env [0.0 % 6.0 (* 1.2 %)]))) 
+         (repeat (!*! env [0.0 0.0 3.0 0.2 3.0 0.0])) 
+         )))
+
+;; Score in measured-score format
+
 (def score
   [:meter 4 4
+   0.0 (sieve-chord perf-fm [8 0] (gen-sieve 7 [2 0]) 1.0 0.25) 
+   0.25 (sieve-chord perf-fm [8 3] (gen-sieve 7 [2 0]) 3.0 0.25) 
 
-  0.0 (sieve-chord perf-fm [8 0] (gen-sieve 7 [2 0]) 1.0 0.25) 
-  0.25 (sieve-chord perf-fm[8 3] (gen-sieve 7 [2 0]) 3.0 0.25) 
-
-  1.0 (sieve-chord perf-fm[9 0] (gen-sieve 7 (U [4 0] [3 1])) 1.0 0.25) 
-  1.25 (sieve-chord perf-fm[7 3] (gen-sieve 7 (U [4 0] [3 1])) 3.0 0.25) 
-
-  ;1.0 (sieve-chord [8 0] (gen-sieve 7 (U [4 0] [3 1])) 3.0 0.10) 
-  ;1.1 (sieve-chord [8 3] (gen-sieve 7 (U [2 0] [3 1])) 3.0 0.10) 
-  ;1.2 (sieve-chord [8 2] (gen-sieve 7 (U [3 0] [4 1])) 3.0 0.10) 
-  ;1.3 (sieve-chord [8 1] (gen-sieve 7 (U [3 2] [4 0])) 3.0 0.10) 
-  ;1.4 (sieve-chord [7 10] (gen-sieve 7 (U [3 0] [4 1])) 3.0 0.10) 
-  ;1.5 (sieve-chord [7 8] (gen-sieve 7 (U [2 0] [3 1])) 3.0 0.10) 
-  ;1.6 (sieve-chord [7 5] (gen-sieve 7 (U [4 0] [3 3] [11 5])) 3.0 0.10) 
-
-  2.0 (sieve-chord perf-fm[8 3] (gen-sieve 7 [2 0]) 8.0 0.05) 
-
- ])
-
-;(defn perf-event
-;  [perf-func audio-event]
-;  (event )
-;  )
+   1.0 (sieve-chord perf-fm [9 0] (gen-sieve 7 (U [4 0] [3 1])) 1.0 0.25) 
+   1.25 (sieve-chord perf-fm [7 3] (gen-sieve 7 (U [4 0] [3 1])) 3.0 0.25) 
+   2.0 (sieve-chord perf-fm [8 3] (gen-sieve 7 [2 0]) 8.0 0.05)   3.0 gliss-fragment 
+   ])
 
 ;; Utility functions for during development
 (defn play-from [^double measure]
@@ -139,8 +140,6 @@
     (add-events)
     ))
 
-(defn play-block [block]
-  (add-audio-events (sco->events block)))
 
 (defn render-to-disk [filename]
   (let [e (engine-create :nchnls 2)]
@@ -172,10 +171,25 @@
 (def fm-echoes (partial echoes perf-fm))
 (def ringm-echoes (partial echoes perf-ringm))
 
+;; CONTROL FUNCTION
+(defn pulsing
+  "Triggers ringm instrument and given frequency and delta-buffer time as atoms. User can adjust values for args externally."
+  [done-atm freq delta-buffers]
+  (let [counter (atom 0)]
+    (fn []    
+      (when (not @done-atm)
+        (swap! counter inc)
+        (when (>= @counter @delta-buffers) 
+          (cause perf-ringm 0.0 5.0 @freq 
+                 (env [0 0.0 2.5 0.5 2.5 0.0]))
+          (reset! counter 0))
+        true))))
+
 (comment
 
   (start-engine)
 
+  ;; use temporal recursion
   (cause fm-echoes 0.0 5 0.25 1.5 400.0 0.5)
   (cause fm-echoes 0.0 5 0.25 3.5 900.0 0.5)
   (cause fm-echoes 0.0 5 0.25 4.5 800.0 0.5)
@@ -184,11 +198,44 @@
   (cause ringm-echoes 0.0 5 0.25 4.25 60.0 0.5)
   (cause ringm-echoes 0.0 5 0.25 4.25 51.0 0.5)
 
-  ;; play from beginning
-  (clear-engine)
+
+  ;; play score 
   (play-from 0)
   (play-from 2)
 
+  ;; play just glissando part
+  (play-from 3.0)
+
+
+  (def done-atm (atom false))
+  (def freq (atom 31.0))
+  (def delta-buffers (atom 3200))
+
+  (def done-atm2 (atom false))
+  (def freq2 (atom 33.0))
+  (def delta-buffers2 (atom 3500))
+
+  ;; performing control function
+  (reset! done-atm true)
+  (reset! done-atm false)
+
+  (reset! done-atm2 true)
+  (reset! done-atm2 false)
+
+  (reset! freq 31.0)
+  (reset! freq2 33.0)
+
+  (reset! freq 41.0)
+  (reset! freq2 44.0)
+
+  (reset! delta-buffers 5300)  
+  (reset! delta-buffers2 4700)  
+
+  (add-post-cfunc (pulsing done-atm freq delta-buffers))
+  (add-post-cfunc (pulsing done-atm2 freq2 delta-buffers2))
+
+  ;; engine stop
+  (clear-engine)
   (stop-engine)
 
   )
