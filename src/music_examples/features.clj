@@ -44,12 +44,12 @@
   ([freq amp]
    (let [e (if (fn? amp) 
              amp
-             (adsr 0.04 2.0 0.0 0.01))] 
+             (mul amp (adsr 0.04 2.0 0.0 0.01)))] 
      (->
        (ringmod 
          (blit-saw freq)
          (sine2 (mul freq 2.0)))
-       (mul amp e)
+       (mul e)
        ))))
 
 ;; AUDIO GRAPH SETUP 
