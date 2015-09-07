@@ -69,7 +69,10 @@
 ;; PERFORMANCE FUNCTIONS 
 ;; =====================
 
-(defn mix-afn [afn loc]
+(defn mix-afn 
+  "Applies panning (loc) to a mono audio function, 
+  then attaches to stereo values to dry and reverb nodes."
+  [afn loc]
   (let-s [sig (pan afn loc)] 
     (node-add-func
       dry-node 
@@ -79,16 +82,21 @@
       (apply-stereo mul sig 0.3)))
   nil)
 
-(defn perf-fm [dur & args] 
-  (println args)
+(defn perf-fm 
+  "Performance function for FM instrument."
+  [dur & args] 
   (binding [*duration* dur] 
     (mix-afn (apply!*! fm args) -0.1)))
 
-(defn perf-ringm [dur & args]
+(defn perf-ringm 
+  "Performance function for ringm instrument."
+  [dur & args]
   (binding [*duration* dur] 
     (mix-afn (apply!*! ringm args) 0.1)))
 
-(defn s [afn start dur & args]
+(defn s 
+  "Convenience function for creating Pink event from Score note."
+  [afn start dur & args]
   (event #(apply afn dur args) start ))
 
 ;; ===== 
@@ -96,6 +104,8 @@
 ;; =====
 
 (defn sieve-chord 
+  "Given instrument function, base pitch, and sieve, 
+  generate chord where sieve values are offsets from base-pch."
   ([base-pch sieve dur amp]
    (sieve-chord perf-ringm base-pch sieve dur amp))
   ([instrfn base-pch sieve dur amp]
@@ -107,7 +117,7 @@
 ;; Set tempo of engine
 (set-tempo 54)
 
-;; glissandi score fragment
+;; glissandi score fragment with higher-order event arguments
 (def gliss-fragment
   (map #(into [perf-fm] %) 
        (gen-notes
@@ -120,7 +130,6 @@
          )))
 
 ;; Score in measured-score format
-
 (def score
   [:meter 4 4
    0.0 (sieve-chord perf-fm [8 0] (gen-sieve 7 [2 0]) 1.0 0.25) 
@@ -128,11 +137,14 @@
 
    1.0 (sieve-chord perf-fm [9 0] (gen-sieve 7 (U [4 0] [3 1])) 1.0 0.25) 
    1.25 (sieve-chord perf-fm [7 3] (gen-sieve 7 (U [4 0] [3 1])) 3.0 0.25) 
-   2.0 (sieve-chord perf-fm [8 3] (gen-sieve 7 [2 0]) 8.0 0.05)   3.0 gliss-fragment 
+   2.0 (sieve-chord perf-fm [8 3] (gen-sieve 7 [2 0]) 8.0 0.05)   
+   3.0 gliss-fragment 
    ])
 
-;; Utility functions for during development
-(defn play-from [^double measure]
+;; UTILITY FUNCTIONS
+(defn play-from 
+  "Plays score starting from a given measure"
+  [^double measure]
   (->>
     (convert-measured-score score)
     (starting-at (* measure 4))
@@ -141,24 +153,14 @@
     ))
 
 
-(defn render-to-disk [filename]
-  (let [e (engine-create :nchnls 2)]
-    (engine-set-tempo e 47)
-    (->> (convert-measured-score score)
-        (sco->events)
-        (audio-events e)
-        (engine-add-events e))
-    (engine->disk e filename)
-    ))
-
 ;; TEMPORAL RECURSION
 
 (defn cause [func start & args]
-  "implementation of Canon-style cause function"
+  "Implementation of Canon-style cause function"
   (add-events (apply event func start args)))
 
 (defn echoes 
-  "temporally-recursive function for performing echoes"
+  "Temporally-recursive function for performing echoes"
   [perf-fn counter dur delta-time freq amp]
   (let [new-count (dec counter)
         new-amp (* amp 0.5)]
@@ -168,6 +170,7 @@
       (cause echoes delta-time perf-fn new-count 
              dur delta-time freq new-amp))))
 
+;; partial function applications to make custom echoes functions
 (def fm-echoes (partial echoes perf-fm))
 (def ringm-echoes (partial echoes perf-ringm))
 
@@ -185,6 +188,8 @@
           (reset! counter 0))
         true))))
 
+;; REAL-TIME PERFORMANCE FUNCTIONS 
+;; evaluate the below at REPL to perform live
 (comment
 
   (start-engine)
