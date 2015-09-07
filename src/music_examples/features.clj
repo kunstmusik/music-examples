@@ -17,7 +17,7 @@
             [pink.effects.reverb :refer :all]
             ))
 
-;; Example of using sieves to generate harmonies
+;; Example of using various features from Pink and Score 
 
 ;; ====================== 
 ;; INSTRUMENT DEFINITIONS 
