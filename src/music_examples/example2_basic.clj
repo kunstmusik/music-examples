@@ -6,9 +6,7 @@
             [pink.oscillators :refer :all]
             [pink.envelopes :refer [env xar]]
             [pink.filters :refer :all]
-            [pink.util :refer :all]
-            [primitive-math :refer [not==]]
-            )
+            [pink.util :refer :all])
   (:import [javax.sound.midi MidiSystem Transmitter Receiver MidiMessage
             ShortMessage ]
            [java.util Arrays]

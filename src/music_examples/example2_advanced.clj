@@ -8,8 +8,7 @@
             [pink.envelopes :refer [env xar adsr]]
             [pink.filters :refer [port butterlp moogladder]]
             [pink.delays :refer :all]
-            [pink.util :refer :all]
-            [primitive-math :refer [not==]])
+            [pink.util :refer :all])
   (:import [javax.sound.midi MidiSystem Transmitter Receiver MidiMessage
             ShortMessage ]
            [java.util Arrays]
