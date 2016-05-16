@@ -31,15 +31,11 @@
              (mul 0.5 (blit-saw (mul 0.999998 f)))
              (mul 0.25 (blit-saw (mul 1.0001 f))))  
         (moogladder cutoff res)
-        (mul ampfn) 
+        (mul ampfn 0.3) 
         (pan 0.0)
         ))))
 
-(add-audio-events
-  (i subtractive 0.0 2.0 440 0.15 4000 0.1) 
-  (i subtractive 0.2 2.0 880 0.15 4000 0.1) 
-  (i subtractive 0.4 2.0 1760 0.15 4000 0.1) 
-  )
+
 
 (defn instr 
   [amp key-num pan-val]
@@ -171,7 +167,12 @@
   
   (start-engine)
 
-  ;; Testing of PinkSignals
   (add-pre-cfunc conductor)
+
+  (add-audio-events
+    (i subtractive 0.0 2.0 440 0.15 4000 0.1) 
+    (i subtractive 0.5 2.0 880 0.15 4000 0.1) 
+    (i subtractive 1.0 2.0 1760 0.15 4000 0.1) )
+
 
 )
