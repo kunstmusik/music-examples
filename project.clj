@@ -22,7 +22,7 @@
    ]
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [kunstmusik/pink "0.3.0-snapshot"]
+                 [kunstmusik/pink "0.3.0"]
                  [kunstmusik/score "0.3.0"]
                  [incanter "1.5.4"]
                  [prismatic/hiphip "0.2.0"]]

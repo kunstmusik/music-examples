@@ -17,24 +17,7 @@
 ;; Study in Lutoslawski-style aleatory (i.e., ad libitum). Cues used by
 ;; conductor process to signal performer processes.  Latch used by conductor to
 ;; wait for each of the initial processes to complete at least one iteration
-;; before waiting to give initial cue.
-
-
-(defn subtractive 
-  [freq amp cutoff res]
-  (let [ampfn (if (number? amp) 
-                (mul amp (adsr 0.05 4.0 0.01 4.0))
-                amp)] 
-    (let-s [f (arg freq)] 
-      (-> 
-        (sum (blit-saw f) 
-             (mul 0.5 (blit-saw (mul 0.999998 f)))
-             (mul 0.25 (blit-saw (mul 1.0001 f))))  
-        (moogladder cutoff res)
-        (mul ampfn 0.3) 
-        (pan 0.0)
-        ))))
-
+;; before waiting to give initial cue. 
 
 
 (defn instr 
@@ -50,6 +33,7 @@
   (add-audio-events 
     (i instr start dur amp midi-key pan-val)))
 
+;; UTILITY FUNCTIONS FOR CREATING PROCESSES
 (defn perf-until-cued
   [pitches durs pan-val cue]
   (process
@@ -84,6 +68,7 @@
               (recur true)
             ))))
 
+;; UTILITY FUNCTIONS FOR SCORE WRITING
 (defn transpose
   [v tr]
   (map #(if (number? %) (+ % tr) %) v))
@@ -92,12 +77,13 @@
   [^double v]
   (* v (/ 60.0 (double *tempo*))))
 
-;; SETUP PERFORMER PROCESSES
+;; SETUP SIGNALS 
 
   (def cue0 (cue))
   (def cue1 (cue))
   (def latch0 (countdown-latch 3))
 
+;; SETUP PERFORMER PROCESSES
   (def p1-proc0 
     (perf-until-cued-signal-latch 
       [0 2 3 0 2 3 :rest 6]
@@ -144,11 +130,12 @@
       0.0
       cue1))
 
-
+;; CHAIN PROCESSES TOGETHER
   (def p1 (chain p1-proc0 p1-proc1))
   (def p2 (chain p2-proc0 p2-proc1))
   (def p3 (chain p3-proc0 p3-proc1))
 
+;; CONDUCTOR PROCESS
   (def conductor 
     (process
       (add-pre-cfunc p3)
@@ -168,11 +155,5 @@
   (start-engine)
 
   (add-pre-cfunc conductor)
-
-  (add-audio-events
-    (i subtractive 0.0 2.0 440 0.15 4000 0.1) 
-    (i subtractive 0.5 2.0 880 0.15 4000 0.1) 
-    (i subtractive 1.0 2.0 1760 0.15 4000 0.1) )
-
 
 )
