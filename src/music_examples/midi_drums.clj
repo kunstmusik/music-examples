@@ -19,8 +19,11 @@
 (def midim (create-midi-manager))
 (def keyboard (add-virtual-device midim "keyboard 1")) 
 
+;; Download Salamander from https://archive.org/details/SalamanderDrumkit and
+;; place within PINK_RESOURCE_ROOT/samples
 (def samples-root
-  "/Users/stevenyi/work/csound/samples/salamanderDrumkit/OH/")
+  (str (System/getenv "PINK_RESOURCE_ROOT") 
+  "/samples/salamanderDrumkit/OH/"))
 
 (defn table 
   [filename]
