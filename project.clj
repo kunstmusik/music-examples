@@ -22,8 +22,8 @@
    ]
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [kunstmusik/pink "0.3.0"]
-                 [kunstmusik/score "0.3.0"]
+                 [kunstmusik/pink "0.4.0-SNAPSHOT"]
+                 [kunstmusik/score "0.4.0-SNAPSHOT"]
                  [incanter "1.5.4"]
                  [prismatic/hiphip "0.2.0"]]
   :profiles  {
