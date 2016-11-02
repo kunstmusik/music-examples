@@ -212,7 +212,7 @@
   (let [[start dur freq] (next-in-atom m7-notes)]
     (when dur
       (when freq
-        (add-wet-dry 0.01 (synth2 (beats dur) freq))) 
+        (add-wet-dry 0.1 (synth2 (beats dur) freq))) 
       (cause m7 (beat-advance 1/4 dur)))))
 
 (comment
@@ -266,11 +266,12 @@
             (next-in-atom pat))))
 
   ;; schedule the function change for m5-freq
-  (cause (next-beat 4)
-       (redef! m5-freq 
+  (cause 
+       #(redef! m5-freq 
           (let [pat (atom (cycle [80 90 100 200]))]
           (fn [] 
-            (next-in-atom pat)))))
+            (next-in-atom pat))))
+       (next-beat 4))
 
   ;; eval to show beat/bar structure in REPL
   (cause beat-printer (next-beat 4) 4 16)
@@ -293,9 +294,12 @@
           (pan 0.1)
           ))))
 
-  (cause reset!! (next-beat 4)
+  (cause reset!! (next-beat 16) 
        (!r! m7-notes)
-       (cycle (lc! '(c2:2 r c2 r g2 c3 g2 c2 r>16))))
+       (cycle 
+         (concat 
+           (repeat-seq 3 (lc! '(c2:2 r c2 2 r g2 c3 g2 c2 r>16)))
+             (lc! '(c2:2 r c2 2 r g2 c3 g2 c2 c3)))))
 
   (cause reset!! (next-beat 16)
          (!r! m7-notes)
@@ -306,3 +310,4 @@
   (stop-engine)
   
   )
+
