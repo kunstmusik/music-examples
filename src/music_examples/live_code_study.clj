@@ -17,6 +17,7 @@
             [score.core :refer :all]
             [score.freq :refer :all]
             [score.lc :refer :all]
+            [score.euclid :refer :all]
             ))
 
 ;; instr
@@ -74,10 +75,11 @@
 (defn sub-beat [n]
   (* (now) n))
 
+(def bd-pat #{0 4 8 12})
+(def snare-pat #{2 4 12 15}) 
+
 (defn drums []
-  (let [n (beat-mod (sub-beat 4) 16)
-        bd-pat #{0 4 8 12 14}
-        snare-pat #{2 4 12 15}]
+  (let [n (beat-mod (sub-beat 4) 16)]
     (play-samp bd bd-pat n 2.0)
     (play-samp snare snare-pat n 1.0)
     ;(play-samp ride (into #{} (range 0 16 2)) n 0.35)
@@ -224,6 +226,19 @@
   ;; eval to get drums going
   (cause drums (next-beat 4))
 
+  (def snare-pat 
+    (second
+                   (reduce 
+                   (fn [[indx coll] b]
+                     (let [c (if (= 1 b)
+                               (conj coll indx)
+                               coll)]
+                       (vector (inc indx) c)))      
+                        [0 #{}] 
+                        (euclid 7 12)
+                           )))
+
+
   ;; eval to get melodic line going
   ;; eval multiple times to get parallel melodic lines 
   (cause m1 (next-beat 4) 0)
@@ -308,6 +323,5 @@
                             ))))
 
   (stop-engine)
-  
   )
 
