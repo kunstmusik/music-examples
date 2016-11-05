@@ -110,16 +110,17 @@
   (with-duration (beats dur) 
     (let [e (shared (adsr 0.01 (beats 0.5) 0.001 (beats 0.5)))]
       (->
-        (sum (blit-saw freq)
-             (blit-saw (* freq 1.0013)) ) 
-        (zdf-ladder (sum 500 (mul 
+        (sum (blit-square freq)
+             (blit-saw (* freq 2.00017)) ) 
+        (k35-hpf 300 8)
+        (k35-lpf (sum 300 (mul 
                                (of-range (let [v (/ (beat-mod 32) 16.0)]
                                            (if (> v 1.0) (- 2.0 v) v)) 
-                                         1000 7000) 
+                                         200 5000) 
                                ;3000
                                   e)) 
-                    0.15)
-        (mul e 0.75)
+                    3)
+        (mul e 0.5)
         (pan 0.0)))))
 
 (comment
@@ -235,7 +236,7 @@
                                coll)]
                        (vector (inc indx) c)))      
                         [0 #{}] 
-                        (euclid 7 12)
+                        (euclid 9 16)
                            )))
 
 
@@ -267,7 +268,6 @@
 
   (cause m3 (next-beat 4))
   (cause m4 (next-beat 4))
-
   (cause m5 (next-beat 4))
   (redef! m5-freq 
           (fn [] 
@@ -321,6 +321,8 @@
          (cycle (lc! '(c2:2 r c2 r c2 r>8
                             c#2:2 r c#2 r c#2 r>16
                             ))))
+
+
 
   (stop-engine)
   )
