@@ -229,15 +229,15 @@
 
   (def snare-pat 
     (second
-                   (reduce 
-                   (fn [[indx coll] b]
-                     (let [c (if (= 1 b)
-                               (conj coll indx)
-                               coll)]
-                       (vector (inc indx) c)))      
-                        [0 #{}] 
-                        (euclid 9 16)
-                           )))
+      (reduce 
+        (fn [[indx coll] b]
+          (let [c (if (= 1 b)
+                    (conj coll indx)
+                    coll)]
+            (vector (inc indx) c)))      
+        [0 #{}] 
+        (euclid 9 16)
+        )))
 
 
   ;; eval to get melodic line going
