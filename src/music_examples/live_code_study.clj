@@ -218,8 +218,15 @@
         (add-wet-dry 0.1 (synth2 (beats dur) freq))) 
       (cause m7 (beat-advance 1/4 dur)))))
 
+(def sound0 
+ (let [b (create-buffer)]
+   (fn [] b)))
+
+(defn sound [] (sound0))
+
 (comment
-    
+
+
   (start-engine)
 
   (set-tempo 106)
@@ -322,6 +329,16 @@
                             c#2:2 r c#2 r c#2 r>16
                             ))))
 
+
+  (cause 
+    #(redef! sound0
+       (-> (blit-saw 80
+             #_(exp-env [0 60 (beats 32) 6000]))
+           (zdf-ladder (sum 800 (lfo 1600 (/ 1.0 (beats 1/4)) :saw)) 0.5)
+           (pan 0.0)))
+    (next-beat 4))
+
+  (cause add-afunc (next-beat 4) sound)
 
 
   (stop-engine)
