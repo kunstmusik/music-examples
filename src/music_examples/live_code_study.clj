@@ -209,7 +209,7 @@
 (def m7-notes (atom nil))
 (reset!! 
        m7-notes
-       (cycle (lc! '(c2:2 r c2 2 r g2 c3 g2 c2 r>16))))
+       (cycle (lc! '(c2:2 r c 2 r g c3 g2 c r>16))))
 
 (defn m7 []
   (let [[start dur freq] (next-in-atom m7-notes)]
@@ -320,14 +320,13 @@
        (!r! m7-notes)
        (cycle 
          (concat 
-           (repeat-seq 3 (lc! '(c2:2 r c2 2 r g2 c3 g2 c2 r>16)))
-             (lc! '(c2:2 r c2 2 r g2 c3 g2 c2 c3)))))
+           (repeat-seq 3 (lc! '(c2:2 r c 2 r g c3 g2 c r>16)))
+             (lc! '(c2:2 r c 2 r g c3 g2 c c3)))))
 
   (cause reset!! (next-beat 16)
          (!r! m7-notes)
-         (cycle (lc! '(c2:2 r c2 r c2 r>8
-                            c#2:2 r c#2 r c#2 r>16
-                            ))))
+         (cycle (lc! '(c2:2 r c r c r>8
+                       c#:2 r c# r c# r>16))))
 
 
   (cause 
