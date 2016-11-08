@@ -180,7 +180,7 @@
   (cause m4 (next-beat 1/4)))
 
 
-(defn m5-freq [] (sym->freq (rand-nth '(f#5 f4 g6) )))
+(defn m5-freq [] (sym->freq (rand-nth '(fs5 f4 g6) )))
 (defn m5 []
   (let [n (beat-mod (sub-beat 4) 16)
         pat #{0 1 2 3 4 5 6 7}

@@ -28,13 +28,13 @@
     (take 1000 (map keyword->freq (cycle [:c4 :d4]))))
 
   (def score2 
-    (take 1000 (map keyword->freq (cycle [:c4 :d4 :e4 :f#4]))))
+    (take 1000 (map keyword->freq (cycle [:c4 :d4 :e4 :fs4]))))
 
   (def score3 
-    (take 1000 (map keyword->freq (cycle [:c5 :d5 :e5 :f#5 :g#4]))))
+    (take 1000 (map keyword->freq (cycle [:c5 :d5 :e5 :fs5 :gs4]))))
 
   (def score4 
-    (take 1000 (map keyword->freq (cycle [:c5 :d6 :e5 :f#6 :g#4]))))
+    (take 1000 (map keyword->freq (cycle [:c5 :d6 :e5 :fs6 :gs4]))))
 
   (defn tempo-change 
     [tatom seconds end-tempo]

@@ -3,7 +3,7 @@
             [clojure.pprint :refer [pprint]])
   (:require [score.core :refer :all]
             [score.amp :refer :all]
-            [score.freq :exclude [pch->freq]]
+            [score.freq :refer :all :exclude [pch->freq]]
             [score.tuning :refer :all]
             [score.util :refer :all])  
   (:require [pink.simple :refer :all]
@@ -87,7 +87,7 @@
     (with-afunc instr-horn
       (let [notes 
             [[0.0 2.0 -6 :A3 0.0]
-             [0.0 2.0 -8 :C#4 0.0]
+             [0.0 2.0 -8 :Cs4 0.0]
              [0.0 2.0 -16 :E4 0.0]
              ]]
         (process-notes notes
