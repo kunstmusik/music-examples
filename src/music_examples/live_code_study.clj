@@ -326,7 +326,7 @@
   (cause reset!! (next-beat 16)
          (!r! m7-notes)
          (cycle (lc! '(c2:2 r c r c r>8
-                       c#:2 r c# r c# r>16))))
+                       cs:2 r cs r cs r>16))))
 
 
   (cause 
