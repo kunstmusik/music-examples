@@ -224,6 +224,46 @@
 
 (defn sound [] (sound0))
 
+(defn distort
+  [afn saturation]
+  (let [out (create-buffer)] 
+    (generator 
+      [] [sig afn]
+      (aset out int-indx (Math/tanh (* sig saturation)))
+      (yield out))))
+
+(defn kdrum [freq]
+  (let [e (exp-env [0 20000 0.05 freq 1 freq])] 
+    (-> (white-noise)
+        (k35-hpf 1000 7)
+        (k35-lpf e 9.8)
+        (distort 1)
+        (mul (xar 0.01 1))
+        (pan 0.0))))
+
+(defn kdrum-perf [freq]
+  (add-wet-dry 0.2 (kdrum freq)))
+
+(defn play-set
+  [beat pat f & args]
+  (when (pat beat)
+    (apply f args)))
+
+(defn kdrum-play [] 
+  (let [beat (beat-mod (sub-beat 4) 16)
+        cym #{4 12 14}
+        bd #{0 1 2 3 4 8 12 13}
+        pat1 #{2 7 10}
+        pat2 #{3 6 11}]
+    (play-set beat cym kdrum-perf 10000)
+    (play-set beat pat1 kdrum-perf (hertz 'c5))
+    (play-set beat pat2 kdrum-perf (hertz 'fs5))
+    (play-set beat bd kdrum-perf 20))
+  (cause kdrum-play (next-beat 1/4)))
+
+#_(cause kdrum-play (next-beat 4 ))
+
+
 (comment
 
 
