@@ -229,7 +229,9 @@
   (let [out (create-buffer)] 
     (generator 
       [] [sig afn]
-      (aset out int-indx (Math/tanh (* sig saturation)))
+      (do 
+        (aset out int-indx (Math/tanh (* sig saturation)))
+        (gen-recur))
       (yield out))))
 
 (defn kdrum [freq]
