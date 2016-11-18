@@ -123,6 +123,23 @@
         (mul e 0.5)
         (pan 0.0)))))
 
+(defn bass 
+  [dur freq]
+  (with-duration (beats dur) 
+    (let [e (shared (adsr 0.01 (beats 0.5) 1.0 (beats 0.5)))]
+      (->
+        (blit-saw freq)
+        (diode-ladder (sum 200 (mul 
+                               (of-range (let [v (/ (beat-mod 32) 16.0)]
+                                           (if (> v 1.0) (- 2.0 v) v)) 
+                                         2000 12000) 
+                               
+                              (xar 0.01 (- dur 0.01))))
+                      12 :norm 4)
+        (mul e 6.0)
+        (pan 0.0)))))
+
+
 (comment
   (add-wet-dry 
     0.2  
@@ -225,12 +242,14 @@
 (defn sound [] (sound0))
 
 (defn distort
-  [afn saturation]
+  [afn ^double saturation]
   (let [out (create-buffer)] 
     (generator 
       [] [sig afn]
       (do 
-        (aset out int-indx (Math/tanh (* sig saturation)))
+        (aset out int-indx 
+              (* (/ 1.0 (Math/tanh saturation))
+                             (Math/tanh (* saturation sig))))
         (gen-recur))
       (yield out))))
 
@@ -240,11 +259,11 @@
         (k35-hpf 1000 7)
         (k35-lpf e 9.8)
         (distort 1)
-        (mul (xar 0.01 1))
+        (mul (xar 0.01 1) 1.0)
         (pan 0.0))))
 
 (defn kdrum-perf [freq]
-  (add-wet-dry 0.2 (kdrum freq)))
+  (add-wet-dry 0.07 (kdrum freq)))
 
 (defn play-set
   [beat pat f & args]
@@ -265,6 +284,29 @@
 
 #_(cause kdrum-play (next-beat 4 ))
 
+(defn pat->set
+  [pat]
+  (second
+    (reduce 
+      (fn [[indx coll] b]
+        (let [c (if (= 1 b)
+                  (conj coll indx)
+                  coll)]
+          (vector (inc indx) c)))      
+      [0 #{}] 
+      pat)))
+
+(defn bass-play
+  []
+  (let [n (beat-mod (sub-beat 4) 16)
+        pat (pat->set (euclid 16 16)) 
+        freqs (map hertz '(g1 cs2 g2 g4))
+        wet-dry 0.1]
+    (when (pat n)
+      (add-wet-dry wet-dry (bass 1/2 (rand-nth freqs)))))
+  (cause bass-play (next-beat 1/4)))
+
+#_(cause bass-play (next-beat 4 ))
 
 (comment
 
@@ -277,16 +319,7 @@
   (cause drums (next-beat 4))
 
   (def snare-pat 
-    (second
-      (reduce 
-        (fn [[indx coll] b]
-          (let [c (if (= 1 b)
-                    (conj coll indx)
-                    coll)]
-            (vector (inc indx) c)))      
-        [0 #{}] 
-        (euclid 9 16)
-        )))
+    (pat->set (euclid 9 16)))
 
 
   ;; eval to get melodic line going
