@@ -12,6 +12,7 @@
             [pink.noise :refer :all]
             [pink.effects.ringmod :refer :all]
             [pink.effects.reverb :refer :all]
+            [pink.effects.distortion :refer :all]
             [pink.io.sound-file :refer :all]
             [clojure.string :refer [join]]
             [score.core :refer :all]
@@ -132,10 +133,10 @@
         (diode-ladder (sum 200 (mul 
                                (of-range (let [v (/ (beat-mod 32) 16.0)]
                                            (if (> v 1.0) (- 2.0 v) v)) 
-                                         2000 12000) 
+                                         2000 16000) 
                                
                               (xar 0.01 (- dur 0.01))))
-                      12 :norm 4)
+                      10 :norm 4)
         (mul e 6.0)
         (pan 0.0)))))
 
@@ -241,24 +242,12 @@
 
 (defn sound [] (sound0))
 
-(defn distort
-  [afn ^double saturation]
-  (let [out (create-buffer)] 
-    (generator 
-      [] [sig afn]
-      (do 
-        (aset out int-indx 
-              (* (/ 1.0 (Math/tanh saturation))
-                             (Math/tanh (* saturation sig))))
-        (gen-recur))
-      (yield out))))
-
 (defn kdrum [freq]
   (let [e (exp-env [0 20000 0.05 freq 1 freq])] 
     (-> (white-noise)
         (k35-hpf 1000 7)
         (k35-lpf e 9.8)
-        (distort 1)
+        (distort 8)
         (mul (xar 0.01 1) 1.0)
         (pan 0.0))))
 
@@ -300,7 +289,7 @@
   []
   (let [n (beat-mod (sub-beat 4) 16)
         pat (pat->set (euclid 16 16)) 
-        freqs (map hertz '(g1 cs2 g2 g4))
+        freqs (map hertz '(g1 cs2 g2 cs3 g3))
         wet-dry 0.1]
     (when (pat n)
       (add-wet-dry wet-dry (bass 1/2 (rand-nth freqs)))))
