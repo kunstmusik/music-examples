@@ -263,15 +263,17 @@
   (let [beat (beat-mod (sub-beat 4) 16)
         cym #{4 12 14}
         bd #{0 1 2 3 4 8 12 13}
+        ;bd #{0 4 8 12}
         pat1 #{2 7 10}
         pat2 #{3 6 11}]
     (play-set beat cym kdrum-perf 10000)
-    (play-set beat pat1 kdrum-perf (hertz 'c5))
-    (play-set beat pat2 kdrum-perf (hertz 'fs5))
+    ;(play-set beat pat1 kdrum-perf (hertz 'c5))
+    ;(play-set beat pat2 kdrum-perf (hertz 'fs5))
     (play-set beat bd kdrum-perf 20))
   (cause kdrum-play (next-beat 1/4)))
 
 #_(cause kdrum-play (next-beat 4 ))
+#_(end-recur! kdrum-play)
 
 (defn pat->set
   [pat]
@@ -285,10 +287,22 @@
       [0 #{}] 
       pat)))
 
+(defn hex->pat
+  [hex-str]
+  (let [beat-pat (Long/toBinaryString 
+                   (Long/parseLong hex-str 16))
+        num-one {(char 49) 1 (char 48) 0}]  
+    (map num-one beat-pat)))
+
+(defn hex->set
+  [hex-str]
+  (pat->set (hex->pat hex-str)))
+
 (defn bass-play
   []
   (let [n (beat-mod (sub-beat 4) 16)
         pat (pat->set (euclid 16 16)) 
+        pat (hex->set "adae")
         freqs (map hertz '(g1 cs2 g2 cs3 g3))
         wet-dry 0.1]
     (when (pat n)
@@ -296,6 +310,8 @@
   (cause bass-play (next-beat 1/4)))
 
 #_(cause bass-play (next-beat 4 ))
+#_(end-recur! bass-play)
+
 
 (comment
 
