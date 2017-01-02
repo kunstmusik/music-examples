@@ -19,6 +19,7 @@
             [score.freq :refer :all]
             [score.lc :refer :all]
             [score.euclid :refer :all]
+            [score.beats :refer :all]
             ))
 
 ;; instr
@@ -242,71 +243,70 @@
 
 (defn sound [] (sound0))
 
-(defn kdrum [freq]
+(defn k35drum [freq amp]
   (let [e (exp-env [0 20000 0.05 freq 1 freq])] 
     (-> (white-noise)
         (k35-hpf 1000 7)
         (k35-lpf e 9.8)
-        (distort 8)
-        (mul (xar 0.01 1) 1.0)
+        (distort 2)
+        (mul (xar 0.01 1) amp)
         (pan 0.0))))
 
-(defn kdrum-perf [freq]
-  (add-wet-dry 0.07 (kdrum freq)))
+(defn k35drum-perf [freq amp]
+  (add-wet-dry 0.07 (k35drum freq amp)))
 
 (defn play-set
   [beat pat f & args]
   (when (pat beat)
     (apply f args)))
 
-(defn kdrum-play [] 
+(defn cosr
+  ^double [^double phs ^double low ^double high]
+  (let [r (- high low)
+        c (Math/cos (* phs (* 2 Math/PI)))]
+    (+ low (* r (* 0.5 (+ 1.0 c))))))
+
+(defn beat-phase 
+  ^double [^double sub-div ^double total]
+  (/ (beat-mod (sub-beat sub-div) total) total))
+
+(defn k35drum-play [] 
   (let [beat (beat-mod (sub-beat 4) 16)
         cym #{4 12 14}
+        cym (hex->set "080f")
         bd #{0 1 2 3 4 8 12 13}
-        ;bd #{0 4 8 12}
+        bd (hex->set "f88c") 
+        ;bd (hex->set "a6a6") 
         pat1 #{2 7 10}
         pat2 #{3 6 11}]
-    (play-set beat cym kdrum-perf 10000)
-    ;(play-set beat pat1 kdrum-perf (hertz 'c5))
-    ;(play-set beat pat2 kdrum-perf (hertz 'fs5))
-    (play-set beat bd kdrum-perf 20))
-  (cause kdrum-play (next-beat 1/4)))
+    (play-set beat cym k35drum-perf 10000 
+              (cosr (beat-phase 4 64) 0.05 0.25))
+    (play-set beat cym k35drum-perf 
+              (cosr (beat-phase 4 64) 100 8000) 
+              (cosr (beat-phase 4 32) 0.05 0.25))
+    ;(play-set beat pat1 k35drum-perf (hertz 'c5) 0.25)
+    ;(play-set beat pat2 k35drum-perf (hertz 'fs5 0.25))
+    (play-set beat bd k35drum-perf 20 1.0))
+  (cause k35drum-play (next-beat 1/4)))
 
-#_(cause kdrum-play (next-beat 4 ))
-#_(end-recur! kdrum-play)
+#_(cause k35drum-play (next-beat 4 ))
+#_(end-recur! k35drum-play)
 
-(defn pat->set
-  [pat]
-  (second
-    (reduce 
-      (fn [[indx coll] b]
-        (let [c (if (= 1 b)
-                  (conj coll indx)
-                  coll)]
-          (vector (inc indx) c)))      
-      [0 #{}] 
-      pat)))
 
-(defn hex->pat
-  [hex-str]
-  (let [beat-pat (Long/toBinaryString 
-                   (Long/parseLong hex-str 16))
-        num-one {(char 49) 1 (char 48) 0}]  
-    (map num-one beat-pat)))
-
-(defn hex->set
-  [hex-str]
-  (pat->set (hex->pat hex-str)))
 
 (defn bass-play
   []
   (let [n (beat-mod (sub-beat 4) 16)
-        pat (pat->set (euclid 16 16)) 
-        pat (hex->set "adae")
+        ;pat (pat->set (euclid 16 16)) 
+        pat (hex->set "a2a2")
+        ;pat (hex->set "abcb")
         freqs (map hertz '(g1 cs2 g2 cs3 g3))
         wet-dry 0.1]
     (when (pat n)
-      (add-wet-dry wet-dry (bass 1/2 (rand-nth freqs)))))
+      (add-wet-dry wet-dry (bass 1/2 (rand-nth freqs)))
+      (add-wet-dry wet-dry (bass 1/2 (freq (cosr (beat-phase 4 32) (sym->notenum 'g3) (sym->notenum 'g5)))))
+      (add-wet-dry wet-dry (bass 1/2 (freq (cosr (beat-phase 4 32) (sym->notenum 'd4) (sym->notenum 'd8)))))
+      ))
   (cause bass-play (next-beat 1/4)))
 
 #_(cause bass-play (next-beat 4 ))
@@ -322,6 +322,7 @@
 
   ;; eval to get drums going
   (cause drums (next-beat 4))
+  (end-recur! drums)
 
   (def snare-pat 
     (pat->set (euclid 9 16)))
