@@ -104,7 +104,7 @@
         (sum (blit-saw freq)
              (blit-square (* freq 2)) ) 
         (zdf-ladder (sum 500 (mul 2000 e)) 0.75)
-        (mul e 0.5)
+        (mul e 2.0)
         (pan 0.0)))))
 
 (defn synth2 
@@ -126,7 +126,8 @@
         (pan 0.0)))))
 
 (defn bass 
-  [dur freq]
+  ([dur freq] (bass dur freq 1.0))
+  ([dur freq amp]
   (with-duration (beats dur) 
     (let [e (shared (adsr 0.01 (beats 0.5) 1.0 (beats 0.5)))]
       (->
@@ -138,8 +139,9 @@
                                
                               (xar 0.01 (- dur 0.01))))
                       10 :norm 4)
-        (mul e 6.0)
-        (pan 0.0)))))
+        (distort 4)
+        (mul e (double amp))
+        (pan 0.0))))))
 
 
 (comment
@@ -248,7 +250,7 @@
     (-> (white-noise)
         (k35-hpf 1000 7)
         (k35-lpf e 9.8)
-        (distort 2)
+        (distort 8)
         (mul (xar 0.01 1) amp)
         (pan 0.0))))
 
@@ -276,16 +278,17 @@
         cym (hex->set "080f")
         bd #{0 1 2 3 4 8 12 13}
         bd (hex->set "f88c") 
+        bd (hex->set "8888") 
         ;bd (hex->set "a6a6") 
         pat1 #{2 7 10}
         pat2 #{3 6 11}]
-    (play-set beat cym k35drum-perf 10000 
-              (cosr (beat-phase 4 64) 0.05 0.25))
-    (play-set beat cym k35drum-perf 
-              (cosr (beat-phase 4 64) 100 8000) 
-              (cosr (beat-phase 4 32) 0.05 0.25))
-    ;(play-set beat pat1 k35drum-perf (hertz 'c5) 0.25)
-    ;(play-set beat pat2 k35drum-perf (hertz 'fs5 0.25))
+    ;(play-set beat cym k35drum-perf 10000 
+    ;          (cosr (beat-phase 4 64) 0.05 0.25))
+    ;(play-set beat cym k35drum-perf 
+    ;          (cosr (beat-phase 4 64) 100 8000) 
+    ;          (cosr (beat-phase 4 32) 0.05 0.25))
+    (play-set beat pat1 k35drum-perf (hertz 'c5) 0.65)
+    ;(play-set beat pat2 k35drum-perf (hertz 'fs5) 0.25)
     (play-set beat bd k35drum-perf 20 1.0))
   (cause k35drum-play (next-beat 1/4)))
 
@@ -296,21 +299,38 @@
 
 (defn bass-play
   []
-  (let [n (beat-mod (sub-beat 4) 16)
-        ;pat (pat->set (euclid 16 16)) 
-        pat (hex->set "a2a2")
+  (let [n (beat-mod (sub-beat 4) 32)
+        ;pat (hex->set "a2a2")
+        pat (hex->set "888afafa")
         ;pat (hex->set "abcb")
-        freqs (map hertz '(g1 cs2 g2 cs3 g3))
+
+        n (beat-mod (sub-beat 4) 64)
+        pat (pat->set (euclid 43 64)) 
+
+        freqs (map hertz '(g1 cs2 g2 cs3 g3 a6))
         wet-dry 0.1]
     (when (pat n)
       (add-wet-dry wet-dry (bass 1/2 (rand-nth freqs)))
-      (add-wet-dry wet-dry (bass 1/2 (freq (cosr (beat-phase 4 32) (sym->notenum 'g3) (sym->notenum 'g5)))))
-      (add-wet-dry wet-dry (bass 1/2 (freq (cosr (beat-phase 4 32) (sym->notenum 'd4) (sym->notenum 'd8)))))
+      (add-wet-dry wet-dry (bass 1/2 (hertz (cosr (beat-phase 4 32) (sym->notenum 'g3) (sym->notenum 'g5)))))
+      (add-wet-dry wet-dry (bass 1/2 (hertz (cosr (beat-phase 4 32) (sym->notenum 'd4) (sym->notenum 'd8)))))
       ))
   (cause bass-play (next-beat 1/4)))
 
 #_(cause bass-play (next-beat 4 ))
 #_(end-recur! bass-play)
+
+(defn perc-mel
+  []
+  (let [n (beat-mod (sub-beat 4) 16)
+        pat (hex->set "ff0e")
+        ]
+   (when (pat n)
+      (add-wet-dry 0.1 (synth1 0.1 (hertz 'g4)))) 
+   (cause perc-mel (next-beat 1/4))
+    ))
+
+#_(cause perc-mel (next-beat 4 ))
+#_(end-recur! perc-mel)
 
 
 (comment
