@@ -74,9 +74,6 @@
   (when (pattern indx)
     (play-sample-one-shot samp-num amp)))
 
-(defn sub-beat [n]
-  (* (now) n))
-
 (def bd-pat #{0 4 8 12})
 (def snare-pat #{2 4 12 15}) 
 
@@ -236,7 +233,9 @@
   (let [[start dur freq] (next-in-atom m7-notes)]
     (when dur
       (when freq
-        (add-wet-dry 0.1 (synth2 (beats dur) freq))) 
+        (add-wet-dry 0.1 
+                     (apply-stereo mul 
+                                   (synth2 (beats dur) freq) 2 ))) 
       (cause m7 (beat-advance 1/4 dur)))))
 
 (def sound0 
@@ -262,22 +261,12 @@
   (when (pat beat)
     (apply f args)))
 
-(defn cosr
-  ^double [^double phs ^double low ^double high]
-  (let [r (- high low)
-        c (Math/cos (* phs (* 2 Math/PI)))]
-    (+ low (* r (* 0.5 (+ 1.0 c))))))
-
-(defn beat-phase 
-  ^double [^double sub-div ^double total]
-  (/ (beat-mod (sub-beat sub-div) total) total))
-
 (defn k35drum-play [] 
   (let [beat (beat-mod (sub-beat 4) 16)
         cym #{4 12 14}
         cym (hex->set "080f")
         bd #{0 1 2 3 4 8 12 13}
-        bd (hex->set "f88c") 
+        ;bd (hex->set "f88c") 
         bd (hex->set "8888") 
         ;bd (hex->set "a6a6") 
         pat1 #{2 7 10}
@@ -300,12 +289,12 @@
 (defn bass-play
   []
   (let [n (beat-mod (sub-beat 4) 32)
-        ;pat (hex->set "a2a2")
-        pat (hex->set "888afafa")
+        pat (hex->set "a2a22a2a")
+        ;pat (hex->set "888afafa")
         ;pat (hex->set "abcb")
 
-        n (beat-mod (sub-beat 4) 64)
-        pat (pat->set (euclid 43 64)) 
+        ;n (beat-mod (sub-beat 4) 64)
+        ;pat (pat->set (euclid 43 64)) 
 
         freqs (map hertz '(g1 cs2 g2 cs3 g3 a6))
         wet-dry 0.1]
@@ -331,6 +320,16 @@
 
 #_(cause perc-mel (next-beat 4 ))
 #_(end-recur! perc-mel)
+
+(defn abb []
+  (let [n (beat-mod (sub-beat 4) 32)
+        pat (hex->set "f8dffd8f")]
+    (when (pat n)
+      (add-wet-dry 0.1 (apply-stereo mul (synth1 0.1 (hertz 'g5)) 4)))
+    (cause abb (next-beat 1/4))
+    ))
+#_(cause abb (next-beat 4 ))
+#_(end-recur! abb)
 
 
 (comment
