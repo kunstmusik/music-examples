@@ -86,9 +86,9 @@
   (cause drums (next-beat 1/4)))
 
 
-(def reverb (create-node :channels 2) )
+(def reverb (audio-node :channels 2) )
 (def reverb-fn
-  (freeverb (node-processor reverb) 0.8 0.25))
+  (freeverb reverb 0.8 0.25))
 
 (add-afunc reverb-fn)
 

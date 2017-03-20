@@ -141,8 +141,8 @@
     [fm additive subtractive])
 
 ;; setup ping-pong delay graph
-  (def sub-node  (create-node))
-  (def sub-node-processor (shared (node-processor sub-node)))
+  (def sub-node  (audio-node))
+  (def sub-node-processor (shared sub-node))
 
   (add-afunc (pan sub-node-processor 0.0))
   (add-afunc (ping-pong-delay sub-node-processor 

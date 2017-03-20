@@ -52,12 +52,12 @@
 ;; AUDIO GRAPH SETUP 
 ;; =================
 
-(def dry-node (create-node :channels 2))
-(def reverb-node (create-node :channels 2))
+(def dry-node (audio-node :channels 2))
+(def reverb-node (audio-node :channels 2))
 
-(add-afunc (node-processor dry-node))
-(add-afunc (freeverb (node-processor reverb-node)
-                    0.9 0.5))
+(add-afunc dry-node)
+(add-afunc (freeverb reverb-node 0.9 0.5))
+
 (defn clear-afns []
   (node-clear dry-node)
   (node-clear reverb-node))
