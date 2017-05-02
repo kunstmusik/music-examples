@@ -81,7 +81,7 @@
   (let [n (beat-mod (sub-beat 4) 16)]
     (play-samp bd bd-pat n 2.0)
     (play-samp snare snare-pat n 1.0)
-    ;(play-samp ride (into #{} (range 0 16 2)) n 0.35)
+    (play-samp ride (into #{} (range 0 16 2)) n 0.35)
     )
   (cause drums (next-beat 1/4)))
 
@@ -100,7 +100,7 @@
       (->
         (sum (blit-saw freq)
              (blit-square (* freq 2)) ) 
-        (zdf-ladder (sum 500 (mul 2000 e)) 0.75)
+        (zdf-ladder (sum 500 (mul 2000 e)) 20)
         (mul e 2.0)
         (pan 0.0)))))
 
@@ -147,7 +147,7 @@
     (-> (sum (blit-saw 400)
              (mul 0.5 (blit-saw 800)
                   (blit-saw 800.2317)))
-        (zdf-ladder (sum 100 (mul 10000 (adsr 0.0 4.0 0 4.0))) 0.8)
+        (zdf-ladder (sum 100 (mul 10000 (adsr 0.0 4.0 0 4.0))) 16)
         (mul 0.8)
         (pan 0.0)
         ))
@@ -285,7 +285,6 @@
 #_(end-recur! k35drum-play)
 
 
-
 (defn bass-play
   []
   (let [n (beat-mod (sub-beat 4) 32)
@@ -411,7 +410,7 @@
         (->
           (sum (blit-triangle pch) 
                (blit-triangle (* pch 2)))
-          (zdf-ladder (sum pch (mul e 4000)) 0.25)
+          (zdf-ladder (sum pch (mul e 4000)) 16)
           (mul 0.25 e )
           (pan 0.1)
           ))))
@@ -433,7 +432,7 @@
     #(redef! sound0
        (-> (blit-saw 80
              #_(exp-env [0 60 (beats 32) 6000]))
-           (zdf-ladder (sum 800 (lfo 1600 (/ 1.0 (beats 1/4)) :saw)) 0.5)
+           (zdf-ladder (sum 800 (lfo 1600 (/ 1.0 (beats 1/4)) :saw)) 12)
            (pan 0.0)))
     (next-beat 4))
 
