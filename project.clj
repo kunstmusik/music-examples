@@ -25,7 +25,9 @@
                  [kunstmusik/pink "0.4.1"]
                  [kunstmusik/score "0.4.0"]
                  [incanter "1.5.4"]
-                 [prismatic/hiphip "0.2.0"]]
+                 [prismatic/hiphip "0.2.0"]
+                 [de.sciss/netutil "1.0.1"]
+                 ]
   :profiles  {
               :dev  {
                      :global-vars  {*warn-on-reflection* true}
