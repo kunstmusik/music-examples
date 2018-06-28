@@ -36,7 +36,7 @@
     (let [e (shared (adsr 0.01 0.05 0.25 0.25))]
       (->
         (sum (blit-saw freq)
-             (blit-square (* freq 2)) ) 
+             (blit-square (mul freq 2)) ) 
         (zdf-ladder (sum 200 (mul 4000 (exp-env [0.0 1.0 dur 0.001] ))) 5)
         (mul e 0.75)
         (pan 0.0)))))
@@ -49,26 +49,49 @@
         indx (rem pulse-num cnt)] 
     (== 1 (nth pat indx))))
 
+(defn xosc [phs values]
+  (let [p (rem phs 1)
+        indx (int (* p (count values)))]
+    (nth values indx)))
+
+
 (defn perf [pulse-num]
   ;; CALLBACK INSTRUMENT
   ;; same style of programming as in Steven's livecode.orc
   ;; Csound live coding framework
 
-  (when (hex "a0" pulse-num)
-    (osc-send "/i" 1 0.25 440 0.25))
+  ;(when (hex "a0" pulse-num)
+  ;  (osc-send "/i" 1 0.25 440 0.25))
 
   ;; set to true to hear Pink synth 
-  (when false  
-    (when (hex "a0" pulse-num)
-      (add-afunc (synth1 0.25 220)) )
+  (when true 
+    (when (hex "1a" pulse-num)
+      (add-afunc (synth1 0.25 
+                         (xosc (/ pulse-num 3.0)
+                               (map hertz [:a4 :ds3 :a2 ])))))
 
     (when (hex "2a" pulse-num)
-      (add-afunc (synth1 0.25 330)) )
+      (add-afunc (synth1 0.25 (hertz :d2))) )
 
-    (when (hex "8020" pulse-num)
-      (add-afunc (synth1 0.5 55))))
+    (when (hex "f0" pulse-num)
+      (add-afunc (synth1 0.5 
+                         (+ (xosc (/ pulse-num 2.0) (map hertz [:a3 :a4]))
+                            (xosc (/ pulse-num 8.0) [0 100 200 400]) 
+
+                            )))))
 
   )
+
+
+(comment
+  (def af0 
+    (synth1 400 (sum (mul (sine 2) 200)  (hertz :e5))))
+  (add-afunc af0)
+  (remove-afunc af0)
+
+
+  (add-afunc (apply-stereo mul (synth1 10 (exp-env [0.0 2000.0 10 200] )) 3))
+)
 
 (def clock-pulse (long-array 1))
 
